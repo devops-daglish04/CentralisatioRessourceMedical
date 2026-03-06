@@ -74,8 +74,12 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+         'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'ressourcemedicales',       # nom de la base que tu as créée
+        'USER': 'rubain',        # utilisateur PostgreSQL
+        'PASSWORD': 'medor@237',   # mot de passe de rubain
+        'HOST': 'localhost',
+        'PORT': '5432',
     }
 }
 
