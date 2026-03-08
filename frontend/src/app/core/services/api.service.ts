@@ -9,6 +9,10 @@ export interface StructureSearchResult {
   address: string;
   contact_phone: string;
   is_active: boolean;
+  availability: boolean;
+  blood_groups: string[];
+  latitude: number;
+  longitude: number;
   location: {
     type: string;
     coordinates: [number, number];
@@ -37,6 +41,9 @@ export interface StructureSearchResult {
 export interface TokenResponse {
   access: string;
   refresh: string;
+  role?: string;
+  structure_id?: number | null;
+  user_id?: number;
 }
 
 export interface GeoPoint {
@@ -52,6 +59,8 @@ export interface ResourceItem {
   quantity: number;
   unit: string;
   status: string;
+  blood_group?: string;
+  availability?: boolean;
   last_updated: string;
 }
 
@@ -61,6 +70,7 @@ export interface CreateResourcePayload {
   quantity: number;
   unit: string;
   status: string;
+  blood_group?: string;
   structure?: number;
 }
 
@@ -81,6 +91,21 @@ export interface StructurePayload {
   contact_phone: string;
   is_active: boolean;
   location: GeoPoint;
+}
+
+export interface SearchStructuresParams {
+  query?: string;
+  type?: string;
+  resource?: string;
+  bloodGroup?: string;
+  availability?: boolean;
+  radius?: number;
+  latitude?: number;
+  longitude?: number;
+  city?: string;
+  limit?: number;
+  includeResources?: boolean;
+  includeServices?: boolean;
 }
 
 export interface AuditLogItem {
@@ -105,18 +130,26 @@ export interface UserItem {
   role: string;
   structure: number | null;
   structure_name?: string;
+  profile_picture?: string | null;
   is_active: boolean;
 }
 
 export interface UserPayload {
   username: string;
   email: string;
+  structure_type?: string;
   first_name?: string;
   last_name?: string;
   role: string;
   structure?: number | null;
   password: string;
   is_active?: boolean;
+}
+
+export interface UserProfilePayload {
+  username?: string;
+  email?: string;
+  profile_picture?: File;
 }
 
 @Injectable({
@@ -126,31 +159,43 @@ export class ApiService {
   private readonly http = inject(HttpClient);
   private readonly baseUrl = '/api';
 
-  searchStructures(
-    lat: number,
-    lng: number,
-    options?: {
-      radiusKm?: number;
-      limit?: number;
-      includeResources?: boolean;
-      includeServices?: boolean;
+  searchStructures(paramsInput: SearchStructuresParams): Observable<StructureSearchResult[]> {
+    const params: Record<string, string> = {};
+    if (paramsInput.query) {
+      params['query'] = paramsInput.query;
     }
-  ): Observable<StructureSearchResult[]> {
-    const params: Record<string, string> = {
-      lat: lat.toString(),
-      lng: lng.toString()
-    };
-    if (options?.radiusKm) {
-      params['radius_km'] = options.radiusKm.toString();
+    if (paramsInput.resource) {
+      params['resource'] = paramsInput.resource;
     }
-    if (options?.limit) {
-      params['limit'] = options.limit.toString();
+    if (paramsInput.type) {
+      params['type'] = paramsInput.type;
     }
-    if (options?.includeResources !== undefined) {
-      params['include_resources'] = options.includeResources ? '1' : '0';
+    if (paramsInput.bloodGroup) {
+      params['blood_group'] = paramsInput.bloodGroup;
     }
-    if (options?.includeServices !== undefined) {
-      params['include_services'] = options.includeServices ? '1' : '0';
+    if (paramsInput.availability !== undefined) {
+      params['availability'] = paramsInput.availability ? '1' : '0';
+    }
+    if (paramsInput.radius !== undefined) {
+      params['radius'] = paramsInput.radius.toString();
+    }
+    if (paramsInput.latitude !== undefined) {
+      params['latitude'] = paramsInput.latitude.toString();
+    }
+    if (paramsInput.longitude !== undefined) {
+      params['longitude'] = paramsInput.longitude.toString();
+    }
+    if (paramsInput.city) {
+      params['city'] = paramsInput.city;
+    }
+    if (paramsInput.limit !== undefined) {
+      params['limit'] = paramsInput.limit.toString();
+    }
+    if (paramsInput.includeResources !== undefined) {
+      params['include_resources'] = paramsInput.includeResources ? '1' : '0';
+    }
+    if (paramsInput.includeServices !== undefined) {
+      params['include_services'] = paramsInput.includeServices ? '1' : '0';
     }
     return this.http.get<StructureSearchResult[]>(`${this.baseUrl}/search/`, {
       params
@@ -172,12 +217,32 @@ export class ApiService {
     return this.http.post<ResourceItem>(`${this.baseUrl}/resources/`, payload);
   }
 
+  updateResource(id: number, payload: Partial<CreateResourcePayload>): Observable<ResourceItem> {
+    return this.http.patch<ResourceItem>(`${this.baseUrl}/resources/${id}/`, payload);
+  }
+
+  deleteResource(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/resources/${id}/`);
+  }
+
   getStructures(): Observable<StructureItem[]> {
     return this.http.get<StructureItem[]>(`${this.baseUrl}/structures/`);
   }
 
+  getStructure(id: number): Observable<StructureItem> {
+    return this.http.get<StructureItem>(`${this.baseUrl}/structures/${id}/`);
+  }
+
+  getMyStructure(): Observable<StructureItem> {
+    return this.http.get<StructureItem>(`${this.baseUrl}/structures/me/`);
+  }
+
   createStructure(payload: StructurePayload): Observable<StructureItem> {
     return this.http.post<StructureItem>(`${this.baseUrl}/structures/`, payload);
+  }
+
+  updateMyStructure(payload: Partial<StructurePayload>): Observable<StructureItem> {
+    return this.http.patch<StructureItem>(`${this.baseUrl}/structures/me/`, payload);
   }
 
   updateStructure(id: number, payload: StructurePayload): Observable<StructureItem> {
@@ -199,8 +264,9 @@ export class ApiService {
     });
   }
 
-  getUsers(): Observable<UserItem[]> {
-    return this.http.get<UserItem[]>(`${this.baseUrl}/users/`);
+  getUsers(role?: string): Observable<UserItem[]> {
+    const params = role ? { role } : undefined;
+    return this.http.get<UserItem[]>(`${this.baseUrl}/users/`, { params });
   }
 
   createUser(payload: UserPayload): Observable<UserItem> {
@@ -213,6 +279,24 @@ export class ApiService {
 
   deleteUser(id: number): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/users/${id}/`);
+  }
+
+  getMyProfile(): Observable<UserItem> {
+    return this.http.get<UserItem>(`${this.baseUrl}/users/me/`);
+  }
+
+  updateMyProfile(payload: UserProfilePayload): Observable<UserItem> {
+    const formData = new FormData();
+    if (payload.username !== undefined) {
+      formData.append('username', payload.username);
+    }
+    if (payload.email !== undefined) {
+      formData.append('email', payload.email);
+    }
+    if (payload.profile_picture) {
+      formData.append('profile_picture', payload.profile_picture);
+    }
+    return this.http.patch<UserItem>(`${this.baseUrl}/users/me/`, formData);
   }
 }
 

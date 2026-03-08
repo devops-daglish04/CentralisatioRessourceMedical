@@ -1,0 +1,107 @@
+:host {
+  display: block;
+}
+
+.structure-card {
+  background: #fff;
+  border: 1px solid #dbe5f2;
+  border-radius: 14px;
+  padding: 12px;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
+}
+
+.card-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+h3 {
+  margin: 0;
+  font-size: 20px;
+  line-height: 1.2;
+  color: #0f172a;
+}
+
+p {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: #475569;
+}
+
+strong {
+  white-space: nowrap;
+  color: #0f172a;
+  font-size: 16px;
+}
+
+.status-line {
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.status-pill {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #991b1b;
+  background: #fee2e2;
+}
+
+.status-pill--ok {
+  color: #166534;
+  background: #dcfce7;
+}
+
+.status-pill--blood {
+  color: #854d0e;
+  background: #fef9c3;
+}
+
+.resources {
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 6px;
+}
+
+.resources li {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 12px;
+  color: #1e293b;
+}
+
+.card-actions {
+  margin-top: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.card-actions button,
+.card-actions a {
+  border: none;
+  border-radius: 999px;
+  padding: 8px 12px;
+  font-size: 12px;
+  text-decoration: none;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.card-actions button,
+.card-actions a {
+  background: #1d4ed8;
+  color: #fff;
+}
+
+.card-actions .secondary {
+  background: #e2e8f0;
+  color: #1e293b;
+}

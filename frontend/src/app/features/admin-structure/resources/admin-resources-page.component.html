@@ -1,80 +1,23 @@
 <div class="grid grid-cols-[2fr,1fr] gap-6">
-  <!-- Top resource summary cards -->
   <div class="col-span-2 grid grid-cols-4 gap-4 mb-4">
-    <div class="bg-white rounded-2xl border border-slate-100 px-4 py-3 flex flex-col gap-1">
-      <div class="flex items-center gap-2">
-        <div class="h-9 w-9 rounded-xl bg-rose-50 flex items-center justify-center">
-          <span>🩸</span>
-        </div>
-        <span class="text-sm font-semibold text-slate-900">Sang</span>
-      </div>
-      <div class="text-xs mt-1">
-        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 text-[11px]">
-          <span class="text-[10px]">▲</span> Faible
-        </span>
-      </div>
-      <p class="text-sm text-slate-800 font-semibold mt-1">
-        {{ totalBlood() }} unités
-      </p>
-      <p class="text-[11px] text-slate-500">MAJ : 08:45</p>
+    <div class="bg-white rounded-2xl border border-slate-100 px-4 py-3">
+      <p class="text-sm font-semibold text-slate-900">Sang</p>
+      <p class="text-xl font-bold text-slate-900">{{ totalBlood() }}</p>
     </div>
-
-    <div class="bg-white rounded-2xl border border-slate-100 px-4 py-3 flex flex-col gap-1">
-      <div class="flex items-center gap-2">
-        <div class="h-9 w-9 rounded-xl bg-emerald-50 flex items-center justify-center">
-          <span>🧪</span>
-        </div>
-        <span class="text-sm font-semibold text-slate-900">Oxygène</span>
-      </div>
-      <div class="text-xs mt-1">
-        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[11px]">
-          Disponible
-        </span>
-      </div>
-      <p class="text-sm text-slate-800 font-semibold mt-1">
-        {{ totalOxygen() }} unités
-      </p>
-      <p class="text-[11px] text-slate-500">MAJ : 09:15</p>
+    <div class="bg-white rounded-2xl border border-slate-100 px-4 py-3">
+      <p class="text-sm font-semibold text-slate-900">Oxygene</p>
+      <p class="text-xl font-bold text-slate-900">{{ totalOxygen() }}</p>
     </div>
-
-    <div class="bg-white rounded-2xl border border-slate-100 px-4 py-3 flex flex-col gap-1">
-      <div class="flex items-center gap-2">
-        <div class="h-9 w-9 rounded-xl bg-sky-50 flex items-center justify-center">
-          <span>👶</span>
-        </div>
-        <span class="text-sm font-semibold text-slate-900">Couveuses</span>
-      </div>
-      <div class="text-xs mt-1">
-        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[11px]">
-          Disponible
-        </span>
-      </div>
-      <p class="text-sm text-slate-800 font-semibold mt-1">
-        {{ totalIncubator() }} unités
-      </p>
-      <p class="text-[11px] text-slate-500">MAJ : 09:00</p>
+    <div class="bg-white rounded-2xl border border-slate-100 px-4 py-3">
+      <p class="text-sm font-semibold text-slate-900">Couveuses</p>
+      <p class="text-xl font-bold text-slate-900">{{ totalIncubator() }}</p>
     </div>
-
-    <div class="bg-white rounded-2xl border border-slate-100 px-4 py-3 flex flex-col gap-1">
-      <div class="flex items-center gap-2">
-        <div class="h-9 w-9 rounded-xl bg-rose-50 flex items-center justify-center">
-          <span>💊</span>
-        </div>
-        <span class="text-sm font-semibold text-slate-900">Médicaments</span>
-      </div>
-      <div class="text-xs mt-1">
-        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 text-[11px]">
-          Rupture
-        </span>
-      </div>
-      <p class="text-sm text-slate-800 font-semibold mt-1">
-        {{ totalMedicine() }} unités
-      </p>
-      <p class="text-[11px] text-slate-500">MAJ : 08:30</p>
+    <div class="bg-white rounded-2xl border border-slate-100 px-4 py-3">
+      <p class="text-sm font-semibold text-slate-900">Medicaments</p>
+      <p class="text-xl font-bold text-slate-900">{{ totalMedicine() }}</p>
     </div>
   </div>
 
-  <!-- Stocks table -->
   <section class="bg-white rounded-2xl border border-slate-100 px-5 py-4">
     <h2 class="text-sm font-semibold text-slate-900 mb-3">Stocks</h2>
 
@@ -84,12 +27,12 @@
           <tr>
             <th class="py-2">Ressource</th>
             <th>Variante</th>
-            <th class="text-right">Quantité</th>
-            <th>Unité</th>
+            <th>Groupe</th>
+            <th class="text-right">Quantite</th>
+            <th>Unite</th>
             <th>Statut</th>
-            <th>Expiration (optionnel)</th>
-            <th>Dernière MAJ</th>
-            <th class="w-16 text-right">Actions</th>
+            <th>Derniere MAJ</th>
+            <th class="w-40 text-right">Actions</th>
           </tr>
         </thead>
         <tbody class="align-middle">
@@ -99,17 +42,24 @@
           <tr *ngFor="let resource of resources(); trackBy: trackById" class="bg-slate-50">
             <td class="py-2 px-1 rounded-l-lg">{{ resource.resource_type }}</td>
             <td>{{ resource.name_or_group }}</td>
+            <td>{{ resource.blood_group || '-' }}</td>
             <td class="text-right">{{ resource.quantity }}</td>
             <td>{{ resource.unit }}</td>
             <td>
-              <span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[11px]">
+              <span class="px-2 py-0.5 rounded-full text-[11px]" [ngClass]="{
+                'bg-emerald-50 text-emerald-700': resource.status === 'Disponible',
+                'bg-amber-50 text-amber-700': resource.status === 'Critique',
+                'bg-rose-50 text-rose-700': resource.status === 'Rupture'
+              }">
                 {{ resource.status }}
               </span>
             </td>
-            <td>-</td>
             <td>{{ resource.last_updated | date: 'short' }}</td>
-            <td class="rounded-r-lg text-right space-x-2 text-slate-400">
-              —
+            <td class="rounded-r-lg text-right space-x-2">
+              <button type="button" class="action-btn" (click)="onEdit(resource)">Modifier</button>
+              <button type="button" class="action-btn danger" (click)="onDelete(resource)">
+                Supprimer
+              </button>
             </td>
           </tr>
           <tr *ngIf="!isLoading() && resources().length === 0">
@@ -122,13 +72,14 @@
     <div
       class="mt-4 rounded-md bg-amber-50 text-amber-800 text-[11px] px-3 py-2 border border-amber-100"
     >
-      Les actions sont journalisées pour des raisons de sécurité et de traçabilité.
+      Les actions sont journalisees pour des raisons de securite et de tracabilite.
     </div>
   </section>
 
-  <!-- Form -->
   <section class="bg-white rounded-2xl border border-slate-100 px-5 py-4">
-    <h2 class="text-sm font-semibold text-slate-900 mb-3">Ajouter / Modifier</h2>
+    <h2 class="text-sm font-semibold text-slate-900 mb-3">
+      {{ editingResourceId() ? 'Modifier ressource' : 'Ajouter ressource' }}
+    </h2>
 
     <form class="flex flex-col gap-3 text-xs" (ngSubmit)="onSubmit()">
       <div class="flex flex-col gap-1">
@@ -136,83 +87,165 @@
         <select
           name="resource_type"
           [(ngModel)]="form.resource_type"
-          class="h-8 rounded-md border border-slate-200 px-2 outline-none focus:ring-2 focus:ring-primary/60 focus:border-primary text-xs"
+          (ngModelChange)="onResourceTypeChange()"
+          class="h-8 rounded-md border border-slate-200 px-2 outline-none"
         >
-          <option>Sang</option>
-          <option value="Oxygene">Oxygène</option>
+          <option value="Sang">Sang</option>
+          <option value="Oxygene">Oxygene</option>
           <option value="Couveuse">Couveuse</option>
-          <option value="Medicament">Médicament</option>
+          <option value="Medicament">Medicament</option>
         </select>
       </div>
 
       <div class="flex gap-3">
         <div class="flex-1 flex flex-col gap-1">
-          <label class="text-slate-700">Variante / Groupe</label>
+          <label class="text-slate-700">Variante / Nom</label>
           <input
             name="name_or_group"
             [(ngModel)]="form.name_or_group"
-            class="h-8 rounded-md border border-slate-200 px-2 outline-none focus:ring-2 focus:ring-primary/60 focus:border-primary text-xs"
+            class="h-8 rounded-md border border-slate-200 px-2 outline-none"
           />
         </div>
         <div class="w-24 flex flex-col gap-1">
-          <label class="text-slate-700">Quantité</label>
+          <label class="text-slate-700">Quantite</label>
           <input
             type="number"
             name="quantity"
             [(ngModel)]="form.quantity"
-            class="h-8 rounded-md border border-slate-200 px-2 outline-none focus:ring-2 focus:ring-primary/60 focus:border-primary text-xs"
-          />
-        </div>
-        <div class="w-28 flex flex-col gap-1">
-          <label class="text-slate-700">Unité</label>
-          <input
-            name="unit"
-            [(ngModel)]="form.unit"
-            class="h-8 rounded-md border border-slate-200 px-2 outline-none focus:ring-2 focus:ring-primary/60 focus:border-primary text-xs"
+            class="h-8 rounded-md border border-slate-200 px-2 outline-none"
           />
         </div>
       </div>
 
       <div class="flex gap-3">
         <div class="flex-1 flex flex-col gap-1">
-          <label class="text-slate-700">Date d'expiration</label>
+          <label class="text-slate-700">Unite</label>
           <input
-            type="date"
-            class="h-8 rounded-md border border-slate-200 px-2 outline-none focus:ring-2 focus:ring-primary/60 focus:border-primary text-xs"
+            name="unit"
+            [(ngModel)]="form.unit"
+            class="h-8 rounded-md border border-slate-200 px-2 outline-none"
           />
         </div>
-        <div class="flex-1 flex flex-col gap-1">
-          <label class="text-slate-700">Statut</label>
+
+        <div class="flex-1 flex flex-col gap-1" *ngIf="form.resource_type === 'Sang'">
+          <label class="text-slate-700">Groupe sanguin</label>
           <select
-            name="status"
-            [(ngModel)]="form.status"
-            class="h-8 rounded-md border border-slate-200 px-2 outline-none focus:ring-2 focus:ring-primary/60 focus:border-primary text-xs"
+            name="blood_group"
+            [(ngModel)]="form.blood_group"
+            class="h-8 rounded-md border border-slate-200 px-2 outline-none"
           >
-            <option>Disponible</option>
-            <option value="Critique">Critique</option>
-            <option>Rupture</option>
+            <option value="">Aucun</option>
+            <option value="A+">A+</option>
+            <option value="A-">A-</option>
+            <option value="B+">B+</option>
+            <option value="B-">B-</option>
+            <option value="AB+">AB+</option>
+            <option value="AB-">AB-</option>
+            <option value="O+">O+</option>
+            <option value="O-">O-</option>
           </select>
         </div>
       </div>
 
       <div class="flex flex-col gap-1">
-        <label class="text-slate-700">Commentaire (optionnel)</label>
-        <textarea
-          rows="3"
-          class="rounded-md border border-slate-200 px-2 py-1 outline-none focus:ring-2 focus:ring-primary/60 focus:border-primary text-xs resize-none"
-        ></textarea>
+        <label class="text-slate-700">Statut</label>
+        <select
+          name="status"
+          [(ngModel)]="form.status"
+          class="h-8 rounded-md border border-slate-200 px-2 outline-none"
+        >
+          <option value="Disponible">Disponible</option>
+          <option value="Critique">Critique</option>
+          <option value="Rupture">Rupture</option>
+        </select>
       </div>
 
+      <button type="submit" [disabled]="isSaving()" class="mt-2 h-9 rounded-md bg-primary text-white">
+        {{ isSaving() ? 'Enregistrement...' : editingResourceId() ? 'Mettre a jour' : 'Enregistrer' }}
+      </button>
       <button
-        type="submit"
-        [disabled]="isSaving()"
-        class="mt-2 h-9 rounded-md bg-primary text-white text-xs font-semibold shadow-md hover:bg-blue-700 transition-colors"
+        *ngIf="editingResourceId()"
+        type="button"
+        class="h-9 rounded-md border border-slate-300"
+        (click)="onCancelEdit()"
       >
-        {{ isSaving() ? 'Enregistrement...' : 'Enregistrer' }}
+        Annuler la modification
       </button>
 
       <p *ngIf="errorMessage()" class="text-[11px] text-red-600">{{ errorMessage() }}</p>
       <p *ngIf="successMessage()" class="text-[11px] text-emerald-700">{{ successMessage() }}</p>
+    </form>
+
+    <hr class="my-5 border-slate-200" />
+
+    <h2 class="text-sm font-semibold text-slate-900 mb-3">Informations structure</h2>
+    <form class="flex flex-col gap-3 text-xs" (ngSubmit)="saveStructureInfo()">
+      <label class="text-slate-700">
+        Nom
+        <input
+          name="structure_name"
+          [(ngModel)]="structureForm.name"
+          class="mt-1 h-8 w-full rounded-md border border-slate-200 px-2 outline-none"
+        />
+      </label>
+      <label class="text-slate-700">
+        Type
+        <select
+          name="structure_type"
+          [(ngModel)]="structureForm.type"
+          class="mt-1 h-8 w-full rounded-md border border-slate-200 px-2 outline-none"
+        >
+          <option value="Hopital">Hopital</option>
+          <option value="Pharmacie">Pharmacie</option>
+          <option value="Banque">Banque</option>
+        </select>
+      </label>
+      <label class="text-slate-700">
+        Adresse
+        <input
+          name="structure_address"
+          [(ngModel)]="structureForm.address"
+          class="mt-1 h-8 w-full rounded-md border border-slate-200 px-2 outline-none"
+        />
+      </label>
+      <label class="text-slate-700">
+        Telephone
+        <input
+          name="structure_phone"
+          [(ngModel)]="structureForm.contact_phone"
+          class="mt-1 h-8 w-full rounded-md border border-slate-200 px-2 outline-none"
+        />
+      </label>
+      <div class="flex gap-2">
+        <label class="text-slate-700 flex-1">
+          Latitude
+          <input
+            type="number"
+            step="0.0001"
+            name="structure_latitude"
+            [(ngModel)]="structureForm.latitude"
+            class="mt-1 h-8 w-full rounded-md border border-slate-200 px-2 outline-none"
+          />
+        </label>
+        <label class="text-slate-700 flex-1">
+          Longitude
+          <input
+            type="number"
+            step="0.0001"
+            name="structure_longitude"
+            [(ngModel)]="structureForm.longitude"
+            class="mt-1 h-8 w-full rounded-md border border-slate-200 px-2 outline-none"
+          />
+        </label>
+      </div>
+      <label class="inline-flex items-center gap-2 text-slate-700">
+        <input type="checkbox" name="structure_active" [(ngModel)]="structureForm.is_active" />
+        Structure active
+      </label>
+      <button type="submit" [disabled]="isSavingStructure()" class="h-9 rounded-md bg-slate-900 text-white">
+        {{ isSavingStructure() ? 'Mise a jour...' : 'Mettre a jour la structure' }}
+      </button>
+      <p *ngIf="structureMessage()" class="text-[11px] text-slate-700">{{ structureMessage() }}</p>
     </form>
   </section>
 </div>

@@ -1,0 +1,80 @@
+<section class="filter-panel">
+  <button
+    *ngIf="collapsible"
+    type="button"
+    class="filter-toggle"
+    (click)="toggle()"
+    [attr.aria-expanded]="!collapsed"
+  >
+    <span>Filtres avances</span>
+    <span>{{ collapsed ? '▾' : '▴' }}</span>
+  </button>
+
+  <div *ngIf="!collapsed" class="panel-body">
+    <div class="field-grid">
+      <label>
+        Type de structure
+        <select [(ngModel)]="model.structureType" (ngModelChange)="emitChange()">
+          <option value="">Tous</option>
+          <option value="Hopital">Hopital</option>
+          <option value="Pharmacie">Pharmacie</option>
+          <option value="Banque">Banque de sang</option>
+        </select>
+      </label>
+
+      <label>
+        Ressource disponible
+        <select [(ngModel)]="model.resource" (ngModelChange)="emitChange()">
+          <option value="">Toutes</option>
+          <option value="blood">Sang</option>
+          <option value="oxygen">Oxygene</option>
+          <option value="medicine">Medicament</option>
+          <option value="incubator">Couveuse</option>
+        </select>
+      </label>
+
+      <label>
+        Groupe sanguin
+        <select [(ngModel)]="model.bloodGroup" (ngModelChange)="emitChange()">
+          <option value="">Tous</option>
+          <option value="A+">A+</option>
+          <option value="A-">A-</option>
+          <option value="B+">B+</option>
+          <option value="B-">B-</option>
+          <option value="AB+">AB+</option>
+          <option value="AB-">AB-</option>
+          <option value="O+">O+</option>
+          <option value="O-">O-</option>
+        </select>
+      </label>
+
+      <label>
+        Rayon de recherche
+        <select [(ngModel)]="model.radius" (ngModelChange)="emitChange()">
+          <option [ngValue]="5">5 km</option>
+          <option [ngValue]="10">10 km</option>
+          <option [ngValue]="25">25 km</option>
+          <option [ngValue]="50">50 km</option>
+        </select>
+      </label>
+
+      <label *ngIf="includeCity">
+        Ville (si geolocalisation refusee)
+        <input type="text" [(ngModel)]="model.city" (ngModelChange)="emitChange()" />
+      </label>
+
+      <label class="availability-toggle">
+        <input
+          type="checkbox"
+          [(ngModel)]="model.availability"
+          (ngModelChange)="emitChange()"
+        />
+        <span>Afficher uniquement les ressources disponibles</span>
+      </label>
+    </div>
+
+    <div class="actions">
+      <button type="button" class="apply-btn" (click)="onSubmit()">{{ submitLabel }}</button>
+    </div>
+  </div>
+</section>

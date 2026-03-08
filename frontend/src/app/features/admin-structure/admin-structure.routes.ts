@@ -16,11 +16,35 @@ export const ADMIN_STRUCTURE_ROUTES: Routes = [
     children: [
       {
         path: '',
-        redirectTo: 'resources',
+        redirectTo: 'dashboard',
         pathMatch: 'full'
       },
       {
+        path: 'dashboard',
+        component: AdminResourcesPageComponent
+      },
+      {
         path: 'resources',
+        redirectTo: 'dashboard',
+        pathMatch: 'full'
+      }
+    ]
+  }
+];
+
+export const STRUCTURE_ADMIN_ROUTES: Routes = [
+  {
+    path: '',
+    component: AdminLayoutComponent,
+    canActivate: [adminRoleGuard],
+    children: [
+      {
+        path: '',
+        redirectTo: 'dashboard',
+        pathMatch: 'full'
+      },
+      {
+        path: 'dashboard',
         component: AdminResourcesPageComponent
       }
     ]

@@ -50,7 +50,33 @@ export class AuthService {
       return false;
     }
     const roleValue = payload['role'] ?? payload['user_role'];
+    if (role === 'ADMIN_STRUCTURE') {
+      return roleValue === 'ADMIN_STRUCTURE' || roleValue === 'STRUCTURE_ADMIN';
+    }
     return roleValue === role;
+  }
+
+  getRole(): string | null {
+    const token = this.getAccessToken();
+    const payload = token ? this.decodePayload(token) : null;
+    if (!payload) {
+      return null;
+    }
+    const roleValue = payload['role'] ?? payload['user_role'];
+    return typeof roleValue === 'string' ? roleValue : null;
+  }
+
+  getStructureId(): number | null {
+    const token = this.getAccessToken();
+    const payload = token ? this.decodePayload(token) : null;
+    if (!payload) {
+      return null;
+    }
+    const structureId = payload['structure_id'];
+    if (typeof structureId === 'number') {
+      return structureId;
+    }
+    return null;
   }
 
   private decodePayload(token: string): JwtPayload | null {

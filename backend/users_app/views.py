@@ -1,9 +1,12 @@
-from rest_framework import viewsets
+from rest_framework import permissions, viewsets
+from rest_framework.decorators import action
+from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
+from rest_framework.response import Response
 from backend.audit_app.services import create_audit_log
 from backend.common.permissions import IsSuperAdmin
 
 from .models import User
-from .serializers import UserSerializer
+from .serializers import UserSelfSerializer, UserSerializer
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -16,6 +19,27 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all().order_by("id")
     serializer_class = UserSerializer
     permission_classes = [IsSuperAdmin]
+    parser_classes = [JSONParser, FormParser, MultiPartParser]
+
+    def get_permissions(self):
+        if self.action == "me":
+            return [permissions.IsAuthenticated()]
+        return [permission() for permission in self.permission_classes]
+
+    def get_serializer_class(self):
+        if self.action == "me":
+            return UserSelfSerializer
+        return super().get_serializer_class()
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        role = self.request.query_params.get("role", "").strip()
+        if role:
+            if role in {"ADMIN_STRUCTURE", "STRUCTURE_ADMIN"}:
+                qs = qs.filter(role__in=["ADMIN_STRUCTURE", "STRUCTURE_ADMIN"])
+            else:
+                qs = qs.filter(role=role)
+        return qs
 
     def perform_create(self, serializer):
         user = serializer.save()
@@ -73,5 +97,18 @@ class UserViewSet(viewsets.ModelViewSet):
             metadata={"deleted": snapshot},
         )
         instance.delete()
+
+    @action(detail=False, methods=["get", "patch"], url_path="me")
+    def me(self, request):
+        serializer = self.get_serializer(
+            request.user,
+            data=request.data if request.method == "PATCH" else None,
+            partial=True,
+        )
+        if request.method == "GET":
+            return Response(serializer.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
 
 

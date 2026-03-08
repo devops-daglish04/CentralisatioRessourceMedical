@@ -1,0 +1,50 @@
+<div class="home-page">
+  <header class="top-nav">
+    <div class="brand">MediResources</div>
+    <nav>
+      <a href="#">Structures</a>
+      <a href="#">Aide</a>
+      <a routerLink="/admin/login" class="admin-link">Connexion admin</a>
+    </nav>
+  </header>
+
+  <main class="hero-layout">
+    <section class="hero">
+      <h1>Trouver une aide medicale proche</h1>
+      <p>Hopitaux, banques de sang et pharmacies autour de vous.</p>
+    </section>
+
+    <section class="search-card">
+      <label for="query">Que recherchez-vous ?</label>
+      <input
+        id="query"
+        type="text"
+        [(ngModel)]="filters.query"
+        placeholder="Ex: hopital, pharmacie, banque de sang"
+      />
+
+      <app-filter-panel
+        [value]="filters"
+        [collapsible]="true"
+        [initiallyCollapsed]="true"
+        [submitLabel]="'Appliquer les filtres'"
+        (valueChange)="onFiltersChanged($event)"
+        (submitFilters)="onSearchWithCurrentFilters()"
+      ></app-filter-panel>
+
+      <button type="button" class="search-btn" (click)="onSearchWithCurrentFilters()">
+        {{ isSearching() ? 'Recherche...' : 'Rechercher' }}
+      </button>
+      <p *ngIf="errorMessage()" class="error">{{ errorMessage() }}</p>
+    </section>
+
+    <section class="quick-actions">
+      <h2>Acces rapide urgence</h2>
+      <div class="quick-grid">
+        <button type="button" (click)="onQuickSearch('blood')">Besoin de sang</button>
+        <button type="button" (click)="onQuickSearch('medicine')">Medicament</button>
+        <button type="button" (click)="onQuickSearch('oxygen')">Oxygene</button>
+      </div>
+    </section>
+  </main>
+</div>

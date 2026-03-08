@@ -6,6 +6,7 @@ class User(AbstractUser):
     class Roles(models.TextChoices):
         PUBLIC = "PUBLIC", "Public"
         STRUCTURE_ADMIN = "STRUCTURE_ADMIN", "Structure admin"
+        ADMIN_STRUCTURE = "ADMIN_STRUCTURE", "Admin structure"
         SUPER_ADMIN = "SUPER_ADMIN", "Super admin"
 
     role = models.CharField(
@@ -21,6 +22,12 @@ class User(AbstractUser):
         null=True,
         blank=True,
         help_text="Structure rattachée pour les comptes STRUCTURE_ADMIN",
+    )
+    profile_picture = models.ImageField(
+        upload_to="profiles/",
+        null=True,
+        blank=True,
+        help_text="Photo de profil de l'utilisateur.",
     )
 
     def save(self, *args, **kwargs):

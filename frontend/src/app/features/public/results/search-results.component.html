@@ -1,0 +1,54 @@
+<div class="results-page">
+  <header class="results-topbar">
+    <button type="button" class="back-btn" routerLink="/public">← Retour</button>
+
+    <input
+      type="text"
+      [(ngModel)]="filters.query"
+      (keyup.enter)="onSubmitTopSearch()"
+      placeholder="Rechercher une structure medicale"
+    />
+
+    <button type="button" class="filter-btn" (click)="onToggleFilters()">Filtres</button>
+    <button type="button" class="search-btn" (click)="onSubmitTopSearch()">Rechercher</button>
+  </header>
+
+  <section *ngIf="showFilters()" class="filters-wrapper">
+    <app-filter-panel
+      [value]="filters"
+      [collapsible]="false"
+      [submitLabel]="'Lancer la recherche'"
+      (valueChange)="onFiltersChanged($event)"
+      (submitFilters)="onSubmitFilters($event)"
+    ></app-filter-panel>
+  </section>
+
+  <main class="results-layout">
+    <section class="list-panel">
+      <div class="list-head">
+        <h2>Structures proches</h2>
+        <span>{{ results().length }} resultats</span>
+      </div>
+
+      <div *ngIf="errorMessage()" class="error">{{ errorMessage() }}</div>
+      <div *ngIf="isLoading()" class="loading">Chargement des resultats...</div>
+
+      <div *ngIf="!isLoading()" class="cards">
+        <app-structure-card
+          *ngFor="let structure of results(); trackBy: trackById"
+          [structure]="structure"
+          (viewDetails)="onOpenDetails($event)"
+          (focusMap)="onFocusOnMap($event)"
+        ></app-structure-card>
+      </div>
+    </section>
+
+    <section class="map-panel">
+      <app-map
+        [structures]="results()"
+        [focusStructureId]="focusedId()"
+        [userLocation]="userLocation()"
+      ></app-map>
+    </section>
+  </main>
+</div>

@@ -1,224 +1,433 @@
-<div class="superadmin-page">
-  <aside class="super-sidebar">
-    <div class="brand-block">
-      <h2>AdminPlateforme</h2>
-      <p>Vue globale</p>
+<div class="super-admin-dashboard" [class.compact-mode]="compactTable">
+  <aside class="dashboard-sidebar">
+    <div class="brand">
+      <span class="brand-dot">➕</span>
+      <span class="brand-name">MediCentral</span>
     </div>
 
     <nav class="sidebar-nav">
-      <a class="nav-item nav-item-active" href="javascript:void(0)">Structures</a>
-      <a class="nav-item" href="javascript:void(0)">Comptes admins</a>
-      <a class="nav-item" href="javascript:void(0)">Audit</a>
-      <a class="nav-item" href="javascript:void(0)">Parametres</a>
+      <p class="nav-section">NAVIGATION</p>
+      <button type="button" class="nav-link" [class.nav-link-active]="isSectionActive('dashboard')" (click)="setActiveSection('dashboard')">
+        <span class="nav-icon">📊</span>
+        <span>Tableau de bord</span>
+      </button>
+
+      <p class="nav-section">GESTION</p>
+      <button type="button" class="nav-link" [class.nav-link-active]="isSectionActive('structures')" (click)="setActiveSection('structures')">
+        <span class="nav-icon">🏢</span>
+        <span>Structures</span>
+      </button>
+      <button type="button" class="nav-link" [class.nav-link-active]="isSectionActive('admins')" (click)="setActiveSection('admins')">
+        <span class="nav-icon">👥</span>
+        <span>Administrateurs</span>
+      </button>
+      <button type="button" class="nav-link" [class.nav-link-active]="isSectionActive('settings')" (click)="setActiveSection('settings')">
+        <span class="nav-icon">⚙️</span>
+        <span>Paramètres</span>
+      </button>
     </nav>
 
-    <div class="sidebar-bottom"></div>
+    <div class="sidebar-user">
+      <div class="user-avatar">
+        <img *ngIf="profilePicturePreview" [src]="profilePicturePreview" alt="Photo de profil" class="profile-picture" />
+        <span *ngIf="!profilePicturePreview">{{ userInitials }}</span>
+      </div>
+      <div>
+        <p class="user-role">Super Admin</p>
+        <p class="user-mail">{{ profileDraft.email }}</p>
+      </div>
+    </div>
   </aside>
 
-  <section class="super-content">
-    <header class="super-topbar">
-      <h1>Admin Plateforme — Gestion des structures + audit</h1>
+  <section class="dashboard-content">
+    <header class="dashboard-topbar">
+      <h1>Tableau de bord d'administration</h1>
+      <div class="topbar-tools">
+        <button type="button" class="top-icon" aria-label="Notifications">🔔</button>
+        <button type="button" class="top-avatar" aria-label="Compte">UA</button>
+      </div>
     </header>
 
-    <main class="super-main">
-      <section class="structures-panel">
-        <div class="panel-header">
-          <h2>Structures</h2>
-          <button type="button" class="btn btn-primary" (click)="openCreateStructureModal()">
-            Creer une structure
+    <main class="dashboard-main">
+      <section class="dashboard-header">
+        <div>
+          <h2>Tableau de bord Super Administrateur</h2>
+          <p>Gerez tous les administrateurs et structures du systeme MediCentral</p>
+        </div>
+        <div class="header-actions">
+          <button type="button" class="create-button" *ngIf="isSectionActive('dashboard') || isSectionActive('admins')" (click)="openCreateAdminModal()">
+            ➕ Nouvel Administrateur
           </button>
+          <button type="button" class="create-button" *ngIf="isSectionActive('structures')" (click)="openCreateStructureModal()">
+            ➕ Nouvelle Structure
+          </button>
+          <button type="button" class="secondary-action" (click)="reloadDashboard()">🔄 Actualiser</button>
         </div>
+      </section>
 
-        <button type="button" class="btn btn-primary btn-left" (click)="openCreateStructureModal()">
-          Creer une structure
-        </button>
-
-        <div class="filters-row">
-          <input
-            type="text"
-            placeholder="Recherche"
-            [(ngModel)]="searchTerm"
-            class="filter-input search-input"
-          />
-          <select [(ngModel)]="selectedType" class="filter-input select-input">
-            <option value="ALL">Type</option>
-            <option *ngFor="let type of availableTypes" [value]="type">{{ type }}</option>
-          </select>
-          <select [(ngModel)]="selectedCity" class="filter-input select-input">
-            <option value="ALL">Ville</option>
-            <option *ngFor="let city of availableCities" [value]="city">{{ city }}</option>
-          </select>
-        </div>
-
-        <div class="table-shell">
-          <table class="structures-table">
-            <thead>
-              <tr>
-                <th>Nom</th>
-                <th>Type</th>
-                <th>Ville</th>
-                <th>Statut</th>
-                <th>Derniere MAJ</th>
-                <th class="actions-header">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngIf="isLoading">
-                <td colspan="6" class="empty-row">Chargement...</td>
-              </tr>
-              <tr *ngFor="let structure of filteredStructures; trackBy: trackByStructure">
-                <td class="name-cell">{{ structure.name }}</td>
-                <td>{{ structure.type }}</td>
-                <td>{{ structure.address.split(',').pop()?.trim() || '-' }}</td>
-                <td>
-                  <span [class]="structureStatusClass(structure.is_active)">
-                    {{ structure.is_active ? 'Actif' : 'Inactif' }}
-                  </span>
-                </td>
-                <td>{{ getLastUpdateForStructure(structure.id) }}</td>
-                <td class="actions-cell">
-                  <button type="button" class="icon-btn" title="Voir" (click)="openViewStructureModal(structure)">
-                    &#128065;
-                  </button>
-                  <button
-                    type="button"
-                    class="icon-btn"
-                    title="Modifier"
-                    (click)="openEditStructureModal(structure)"
-                  >
-                    &#9998;
-                  </button>
-                  <button
-                    type="button"
-                    class="icon-btn icon-btn-danger"
-                    title="Supprimer"
-                    (click)="requestDeleteStructure(structure)"
-                  >
-                    &#128465;
-                  </button>
-                </td>
-              </tr>
-              <tr *ngIf="!isLoading && filteredStructures.length === 0">
-                <td colspan="6" class="empty-row">Aucune structure ne correspond aux filtres.</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <div class="admin-row">
-          <div class="admin-inputs">
-            <div class="field">
-              <label>Email</label>
-              <input type="email" [(ngModel)]="adminDraft.email" />
+      <section class="dashboard-section" *ngIf="isSectionActive('dashboard')">
+        <section class="stats-grid">
+          <button type="button" class="stat-card" (click)="applyDashboardCardAction('ALL')">
+            <div class="stat-icon stat-icon-blue">👥</div>
+            <div>
+              <p class="stat-label">Administrateurs totaux</p>
+              <p class="stat-value">{{ totalAdmins }}</p>
             </div>
-            <div class="field">
-              <label>Nom</label>
-              <input type="text" [(ngModel)]="adminDraft.username" />
+          </button>
+
+          <button type="button" class="stat-card" (click)="applyDashboardCardAction('ACTIVE')">
+            <div class="stat-icon stat-icon-green">✅</div>
+            <div>
+              <p class="stat-label">Actifs</p>
+              <p class="stat-value">{{ activeAdmins }}</p>
             </div>
-            <div class="field">
-              <label>Structure associee</label>
-              <select [(ngModel)]="adminDraft.structureId">
-                <option [ngValue]="null">Structure associee</option>
-                <option *ngFor="let structure of structures; trackBy: trackByStructure" [ngValue]="structure.id">
-                  {{ structure.name }}
-                </option>
+          </button>
+
+          <button type="button" class="stat-card" (click)="applyDashboardCardAction('INACTIVE')">
+            <div class="stat-icon stat-icon-yellow">⚠️</div>
+            <div>
+              <p class="stat-label">Inactifs</p>
+              <p class="stat-value">{{ inactiveAdmins }}</p>
+            </div>
+          </button>
+
+          <button type="button" class="stat-card" (click)="applyDashboardCardAction('STRUCTURES')">
+            <div class="stat-icon stat-icon-pink">🏢</div>
+            <div>
+              <p class="stat-label">Structures</p>
+              <p class="stat-value">{{ totalStructures }}</p>
+            </div>
+          </button>
+        </section>
+
+        <section class="admins-card">
+          <div class="card-toolbar">
+            <h3>Liste des administrateurs</h3>
+            <div class="filters">
+              <input type="text" class="filter-input" placeholder="Rechercher un admin..." [(ngModel)]="adminSearchTerm" />
+              <select class="filter-input" [(ngModel)]="adminFilter">
+                <option value="ALL">Tous</option>
+                <option value="ACTIVE">Actifs</option>
+                <option value="INACTIVE">Inactifs</option>
               </select>
             </div>
           </div>
 
-          <div class="create-admin-card">
-            <h3>Creer admin de structure</h3>
-            <button type="button" class="btn btn-primary" [disabled]="isSavingAdmin" (click)="createStructureAdmin()">
-              {{ isSavingAdmin ? 'Creation...' : 'Creer' }}
-            </button>
+          <div class="table-shell">
+            <table class="admins-table">
+              <thead>
+                <tr>
+                  <th>Administrateur</th>
+                  <th>E-mail</th>
+                  <th>Structure</th>
+                  <th>Statut</th>
+                  <th>Actes</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngIf="isLoading">
+                  <td colspan="5" class="empty-row">Chargement...</td>
+                </tr>
+
+                <tr *ngFor="let admin of filteredAdmins; trackBy: trackByAdmin">
+                  <td class="admin-name">{{ admin.username }}</td>
+                  <td>{{ admin.email }}</td>
+                  <td>{{ resolveStructureName(admin) }}</td>
+                  <td>
+                    <span [class]="adminStatusClass(admin.is_active)">{{ adminStatusLabel(admin.is_active) }}</span>
+                  </td>
+                  <td class="actions-cell">
+                    <button type="button" class="action-btn action-btn-neutral" (click)="openViewAdminModal(admin)">👁</button>
+                    <button type="button" class="action-btn action-btn-neutral" (click)="openEditAdminModal(admin)">✏️</button>
+                    <button type="button" class="action-btn action-btn-neutral" [disabled]="isUpdatingAdminId === admin.id" (click)="toggleAdminStatus(admin)">
+                      {{ admin.is_active ? 'Desactiver' : 'Activer' }}
+                    </button>
+                    <button type="button" class="action-btn action-btn-danger" [disabled]="isDeletingAdminId === admin.id" (click)="removeAdmin(admin)">
+                      {{ isDeletingAdminId === admin.id ? 'Suppression...' : 'Supprimer' }}
+                    </button>
+                  </td>
+                </tr>
+
+                <tr *ngIf="!isLoading && filteredAdmins.length === 0">
+                  <td colspan="5" class="empty-row">Aucun administrateur de structure trouve.</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
-        </div>
+        </section>
       </section>
 
-      <aside class="audit-panel">
-        <h3>Audit recent</h3>
-        <div class="audit-timeline">
-          <div *ngFor="let audit of audits; trackBy: trackByAudit" class="audit-item">
-            <div class="audit-dot"></div>
-            <div class="audit-content">
-              <p class="audit-text">
-                <strong>{{ formatAuditActor(audit) }}</strong>
-                {{ formatAuditAction(audit.action) }}
-              </p>
-              <p class="audit-meta">{{ formatTimestamp(audit.timestamp) }}</p>
-              <span class="detail-link">Details</span>
+      <section class="dashboard-section" *ngIf="isSectionActive('admins')">
+        <section class="admins-card">
+          <div class="card-toolbar">
+            <h3>Gestion des administrateurs</h3>
+            <div class="filters">
+              <input type="text" class="filter-input" placeholder="Recherche par nom, email ou structure" [(ngModel)]="adminSearchTerm" />
             </div>
           </div>
-          <p *ngIf="audits.length === 0 && !isLoading" class="empty-audit">Aucun log d'audit.</p>
-        </div>
-      </aside>
+
+          <div class="table-shell">
+            <table class="admins-table">
+              <thead>
+                <tr>
+                  <th>Nom</th>
+                  <th>Email</th>
+                  <th>Structure rattachée</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngIf="isLoading">
+                  <td colspan="4" class="empty-row">Chargement...</td>
+                </tr>
+                <tr *ngFor="let admin of filteredAdmins; trackBy: trackByAdmin">
+                  <td class="admin-name">{{ admin.username }}</td>
+                  <td>{{ admin.email }}</td>
+                  <td>{{ resolveStructureName(admin) }}</td>
+                  <td class="actions-cell">
+                    <button type="button" class="action-btn action-btn-neutral" (click)="openEditAdminModal(admin)">
+                      Modifier
+                    </button>
+                    <button type="button" class="action-btn action-btn-danger" [disabled]="isDeletingAdminId === admin.id" (click)="removeAdmin(admin)">
+                      Supprimer
+                    </button>
+                  </td>
+                </tr>
+                <tr *ngIf="!isLoading && filteredAdmins.length === 0">
+                  <td colspan="4" class="empty-row">Aucun administrateur trouve.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </section>
+
+      <section class="dashboard-section" *ngIf="isSectionActive('structures')">
+        <section class="structures-card">
+          <div class="card-toolbar">
+            <h3>Gestion des structures</h3>
+            <div class="filters">
+              <input type="text" class="filter-input" placeholder="Recherche structure..." [(ngModel)]="structureSearchTerm" />
+            </div>
+          </div>
+
+          <div class="table-shell">
+            <table class="admins-table">
+              <thead>
+                <tr>
+                  <th>Nom</th>
+                  <th>Type</th>
+                  <th>Ville</th>
+                  <th>Statut</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngIf="isLoading">
+                  <td colspan="5" class="empty-row">Chargement...</td>
+                </tr>
+                <tr *ngFor="let structure of filteredStructures; trackBy: trackByStructure">
+                  <td class="admin-name">{{ structure.name }}</td>
+                  <td>{{ structure.type }}</td>
+                  <td>{{ resolveStructureCity(structure) }}</td>
+                  <td>
+                    <span [class]="structureStatusClass(structure.is_active)">{{ structureStatusLabel(structure.is_active) }}</span>
+                  </td>
+                  <td class="actions-cell">
+                    <button type="button" class="action-btn action-btn-neutral" (click)="openViewStructureModal(structure)">👁 Voir</button>
+                    <button type="button" class="action-btn action-btn-neutral" (click)="openEditStructureModal(structure)">✏️ Modifier</button>
+                    <button type="button" class="action-btn action-btn-danger" (click)="requestDeleteStructure(structure)">🗑 Supprimer</button>
+                  </td>
+                </tr>
+                <tr *ngIf="!isLoading && filteredStructures.length === 0">
+                  <td colspan="5" class="empty-row">Aucune structure trouvee.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </section>
+
+      <section class="dashboard-section" *ngIf="isSectionActive('settings')">
+        <section class="settings-card">
+          <h3>Profil Super Admin</h3>
+          <div class="profile-grid">
+            <label>
+              Nom
+              <input type="text" [(ngModel)]="profileDraft.username" />
+            </label>
+            <label>
+              Email
+              <input type="email" [(ngModel)]="profileDraft.email" />
+            </label>
+            <label class="full-width">
+              Photo de profil
+              <input type="file" accept="image/*" (change)="onProfilePictureSelected($event)" />
+            </label>
+            <div class="full-width preview-wrap" *ngIf="profilePicturePreview">
+              <img [src]="profilePicturePreview" alt="Aperçu profil" class="profile-preview" />
+            </div>
+          </div>
+          <div class="settings-actions">
+            <button type="button" class="create-button" [disabled]="isSavingProfile" (click)="saveSuperAdminProfile()">
+              {{ isSavingProfile ? 'Enregistrement...' : 'Mettre a jour le profil' }}
+            </button>
+          </div>
+          <p class="profile-message" *ngIf="profileMessage">{{ profileMessage }}</p>
+        </section>
+      </section>
     </main>
   </section>
 </div>
 
-<div *ngIf="structureModalOpen" class="modal-backdrop">
+<div *ngIf="createAdminModalOpen" class="modal-backdrop">
   <div class="modal-card">
     <div class="modal-header">
-      <h3>{{ structureModalTitle }}</h3>
-      <button type="button" class="close-btn" (click)="closeStructureModal()">&#10005;</button>
+      <h3>➕ Nouvel Administrateur</h3>
+      <button type="button" class="close-btn" (click)="closeCreateAdminModal()">✖</button>
     </div>
-
-    <div class="modal-form-grid">
+    <div class="modal-grid">
       <label>
         Nom
-        <input type="text" [(ngModel)]="structureDraft.name" [disabled]="isStructureFormReadOnly" />
+        <input type="text" [(ngModel)]="adminDraft.name" />
       </label>
       <label>
-        Type
-        <select [(ngModel)]="structureDraft.type" [disabled]="isStructureFormReadOnly">
+        Email
+        <input type="email" [(ngModel)]="adminDraft.email" />
+      </label>
+      <label>
+        Mot de passe
+        <input type="password" [(ngModel)]="adminDraft.password" />
+      </label>
+      <label>
+        Type de structure
+        <select [(ngModel)]="adminDraft.structureType" (ngModelChange)="onAdminStructureTypeChange()">
+          <option value="">Selectionner un type</option>
           <option value="Hopital">Hopital</option>
           <option value="Pharmacie">Pharmacie</option>
           <option value="Banque">Banque de sang</option>
         </select>
       </label>
-      <label>
-        Ville
-        <input type="text" [(ngModel)]="structureDraft.city" [disabled]="isStructureFormReadOnly" />
-      </label>
-      <label>
-        Adresse
-        <input type="text" [(ngModel)]="structureDraft.addressLine" [disabled]="isStructureFormReadOnly" />
-      </label>
-      <label>
-        Contact
-        <input type="text" [(ngModel)]="structureDraft.contactPhone" [disabled]="isStructureFormReadOnly" />
-      </label>
-      <label>
-        Statut
-        <select [(ngModel)]="structureDraft.isActive" [disabled]="isStructureFormReadOnly">
-          <option [ngValue]="true">Actif</option>
-          <option [ngValue]="false">Inactif</option>
-        </select>
+      <label class="full-width">
+        Nom de la structure
+        <input type="text" [(ngModel)]="adminDraft.structureName" />
       </label>
     </div>
-
     <div class="modal-actions">
-      <button type="button" class="btn btn-light" (click)="closeStructureModal()">Fermer</button>
-      <button
-        *ngIf="!isStructureFormReadOnly"
-        type="button"
-        class="btn btn-primary"
-        [disabled]="isSavingStructure"
-        (click)="saveStructure()"
-      >
-        {{ isSavingStructure ? 'Enregistrement...' : structureModalActionLabel }}
+      <button type="button" class="secondary-btn" (click)="closeCreateAdminModal()">Annuler</button>
+      <button type="button" class="primary-btn" [disabled]="isSavingAdmin" (click)="createStructureAdmin()">
+        {{ isSavingAdmin ? 'Creation...' : 'Creer le compte' }}
       </button>
     </div>
   </div>
 </div>
 
-<div *ngIf="pendingDelete" class="modal-backdrop danger-backdrop">
-  <div class="confirm-card">
-    <h3>Supprimer la structure</h3>
-    <p>Confirmer la suppression de <strong>{{ pendingDelete.name }}</strong> ?</p>
+<div *ngIf="adminModalOpen" class="modal-backdrop">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3>{{ adminModalMode === 'edit' ? '✏️ Modifier administrateur' : '👁 Details administrateur' }}</h3>
+      <button type="button" class="close-btn" (click)="closeAdminModal()">✖</button>
+    </div>
+    <div class="modal-grid">
+      <label>
+        Nom
+        <input type="text" [(ngModel)]="adminEditDraft.name" [disabled]="adminModalMode !== 'edit'" />
+      </label>
+      <label>
+        Email
+        <input type="email" [(ngModel)]="adminEditDraft.email" [disabled]="adminModalMode !== 'edit'" />
+      </label>
+      <label>
+        Structure
+        <select [(ngModel)]="adminEditDraft.structureId" [disabled]="adminModalMode !== 'edit'">
+          <option [ngValue]="null">Selectionner une structure</option>
+          <option *ngFor="let structure of structures; trackBy: trackByStructure" [ngValue]="structure.id">
+            {{ structure.name }}
+          </option>
+        </select>
+      </label>
+    </div>
     <div class="modal-actions">
-      <button type="button" class="btn btn-light" (click)="cancelDeleteStructure()">Annuler</button>
-      <button type="button" class="btn btn-danger" [disabled]="isDeletingStructure" (click)="confirmDeleteStructure()">
+      <button type="button" class="secondary-btn" (click)="closeAdminModal()">Fermer</button>
+      <button type="button" class="primary-btn" *ngIf="adminModalMode === 'edit'" [disabled]="selectedAdmin && isUpdatingAdminId === selectedAdmin.id" (click)="saveAdminChanges()">
+        {{ selectedAdmin && isUpdatingAdminId === selectedAdmin.id ? 'Enregistrement...' : 'Enregistrer' }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="structureModalOpen" class="modal-backdrop">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3>
+        {{
+          structureModalMode === 'create'
+            ? '➕ Nouvelle structure'
+            : structureModalMode === 'edit'
+              ? '✏️ Modifier structure'
+              : '👁 Details structure'
+        }}
+      </h3>
+      <button type="button" class="close-btn" (click)="closeStructureModal()">✖</button>
+    </div>
+    <div class="modal-grid">
+      <label>
+        Nom
+        <input type="text" [(ngModel)]="structureDraft.name" [disabled]="structureModalMode === 'view'" />
+      </label>
+      <label>
+        Type
+        <select [(ngModel)]="structureDraft.type" [disabled]="structureModalMode === 'view'">
+          <option value="Hopital">Hopital</option>
+          <option value="Pharmacie">Pharmacie</option>
+          <option value="Banque">Banque de sang</option>
+          <option value="Clinique">Clinique</option>
+        </select>
+      </label>
+      <label>
+        Ville
+        <input type="text" [(ngModel)]="structureDraft.city" [disabled]="structureModalMode === 'view'" />
+      </label>
+      <label>
+        Contact
+        <input type="text" [(ngModel)]="structureDraft.contactPhone" [disabled]="structureModalMode === 'view'" />
+      </label>
+      <label class="full-width">
+        Adresse
+        <input type="text" [(ngModel)]="structureDraft.addressLine" [disabled]="structureModalMode === 'view'" />
+      </label>
+      <label>
+        Latitude
+        <input type="number" [(ngModel)]="structureDraft.latitude" [disabled]="structureModalMode === 'view'" />
+      </label>
+      <label>
+        Longitude
+        <input type="number" [(ngModel)]="structureDraft.longitude" [disabled]="structureModalMode === 'view'" />
+      </label>
+      <label>
+        Statut
+        <select [(ngModel)]="structureDraft.isActive" [disabled]="structureModalMode === 'view'">
+          <option [ngValue]="true">Actif</option>
+          <option [ngValue]="false">Inactif</option>
+        </select>
+      </label>
+    </div>
+    <div class="modal-actions">
+      <button type="button" class="secondary-btn" (click)="closeStructureModal()">Annuler</button>
+      <button type="button" class="primary-btn" *ngIf="structureModalMode !== 'view'" [disabled]="isSavingStructure" (click)="saveStructure()">
+        {{ isSavingStructure ? 'Enregistrement...' : 'Enregistrer' }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="pendingDeleteStructure" class="modal-backdrop danger-backdrop">
+  <div class="confirm-card">
+    <h3>🗑 Supprimer la structure</h3>
+    <p>Confirmer la suppression de <strong>{{ pendingDeleteStructure.name }}</strong> ?</p>
+    <div class="modal-actions">
+      <button type="button" class="secondary-btn" (click)="cancelDeleteStructure()">Annuler</button>
+      <button type="button" class="danger-btn" [disabled]="isDeletingStructure" (click)="confirmDeleteStructure()">
         {{ isDeletingStructure ? 'Suppression...' : 'Supprimer' }}
       </button>
     </div>

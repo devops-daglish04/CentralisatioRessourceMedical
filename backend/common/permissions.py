@@ -9,7 +9,10 @@ class IsSuperAdmin(BasePermission):
         return bool(
             user
             and user.is_authenticated
-            and getattr(user, "role", None) == "SUPER_ADMIN"
+            and (
+                getattr(user, "role", None) == "SUPER_ADMIN"
+                or getattr(user, "is_superuser", False)
+            )
         )
 
 
@@ -23,14 +26,17 @@ class ReadOnlyOrSuperAdmin(BasePermission):
         return bool(
             user
             and user.is_authenticated
-            and getattr(user, "role", None) == "SUPER_ADMIN"
+            and (
+                getattr(user, "role", None) == "SUPER_ADMIN"
+                or getattr(user, "is_superuser", False)
+            )
         )
 
 
 class ReadOnlyOrStructureOrSuperAdmin(BasePermission):
     """Allow read-only for everyone, write operations for structure/super admins."""
 
-    allowed_write_roles = {"STRUCTURE_ADMIN", "SUPER_ADMIN"}
+    allowed_write_roles = {"STRUCTURE_ADMIN", "ADMIN_STRUCTURE", "SUPER_ADMIN"}
 
     def has_permission(self, request, view) -> bool:
         if request.method in SAFE_METHODS:

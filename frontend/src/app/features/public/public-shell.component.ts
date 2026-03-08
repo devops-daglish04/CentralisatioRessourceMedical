@@ -52,11 +52,14 @@ export class PublicShellComponent implements OnInit {
   private performSearch(lat: number, lng: number): void {
     this.isLoading.set(true);
     this.api
-      .searchStructures(lat, lng, {
-        radiusKm: 30,
+      .searchStructures({
+        latitude: lat,
+        longitude: lng,
+        radius: 30,
         limit: 80,
         includeResources: true,
-        includeServices: false
+        includeServices: false,
+        availability: false
       })
       .subscribe({
       next: (data) => {

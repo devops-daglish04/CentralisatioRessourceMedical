@@ -1,0 +1,79 @@
+:host {
+  display: block;
+}
+
+.details-page {
+  min-height: 100vh;
+  padding: 18px;
+  background: #f1f5f9;
+}
+
+.back-link {
+  text-decoration: none;
+  color: #1e3a8a;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.state-card {
+  margin-top: 14px;
+  border-radius: 12px;
+  background: #fff;
+  padding: 16px;
+  border: 1px solid #d5dfed;
+}
+
+.state-card--error {
+  color: #b91c1c;
+  background: #fee2e2;
+}
+
+.details-header {
+  margin-top: 14px;
+  background: #fff;
+  border: 1px solid #d5dfed;
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.details-header h1 {
+  margin: 0;
+  font-size: 28px;
+  color: #0f172a;
+}
+
+.details-header p {
+  margin: 6px 0 0;
+  color: #334155;
+}
+
+.resources-card {
+  margin-top: 14px;
+  background: #fff;
+  border: 1px solid #d5dfed;
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.resources-card h2 {
+  margin: 0 0 10px;
+  color: #0f172a;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  text-align: left;
+  border-top: 1px solid #e2e8f0;
+  padding: 8px;
+  font-size: 13px;
+}
+
+thead th {
+  border-top: none;
+  color: #475569;
+}

@@ -6,9 +6,17 @@ export const superAdminRoleGuard: CanActivateFn = () => {
   const auth = inject(AuthService);
   const router = inject(Router);
 
-  if (auth.isAuthenticated() && auth.hasRole('SUPER_ADMIN')) {
+  if (!auth.isAuthenticated()) {
+    return router.createUrlTree(['/public']);
+  }
+
+  if (auth.hasRole('SUPER_ADMIN')) {
     return true;
   }
 
-  return router.createUrlTree(['/admin/login']);
+  if (auth.hasRole('ADMIN_STRUCTURE') || auth.hasRole('STRUCTURE_ADMIN')) {
+    return router.createUrlTree(['/structure-admin/dashboard']);
+  }
+
+  return router.createUrlTree(['/public']);
 };

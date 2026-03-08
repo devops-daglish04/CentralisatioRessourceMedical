@@ -1,0 +1,164 @@
+:host {
+  display: block;
+  min-height: 100vh;
+}
+
+.home-page {
+  min-height: 100vh;
+  background:
+    linear-gradient(180deg, rgba(230, 238, 250, 0.7), rgba(244, 247, 250, 0.92)),
+    url('https://images.unsplash.com/photo-1584515933487-779824d29309?auto=format&fit=crop&w=1600&q=60')
+      center/cover no-repeat;
+}
+
+.top-nav {
+  height: 72px;
+  background: #fff;
+  border-bottom: 1px solid #dde6f4;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 30px;
+}
+
+.brand {
+  font-size: 36px;
+  font-weight: 700;
+  color: #0f4e77;
+  letter-spacing: -0.02em;
+}
+
+nav {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+nav a {
+  color: #334155;
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.admin-link {
+  border-radius: 999px;
+  background: #1d4ed8;
+  color: #fff;
+  padding: 8px 14px;
+}
+
+.hero-layout {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 30px 20px 48px;
+  display: grid;
+  gap: 18px;
+}
+
+.hero {
+  text-align: center;
+}
+
+.hero h1 {
+  margin: 0;
+  font-size: 44px;
+  font-weight: 700;
+  color: #075985;
+}
+
+.hero p {
+  margin: 8px 0 0;
+  color: #334155;
+  font-size: 16px;
+}
+
+.search-card {
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid #d9e3f2;
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 15px 32px rgba(15, 23, 42, 0.12);
+  display: grid;
+  gap: 10px;
+}
+
+.search-card label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.search-card input {
+  height: 42px;
+  border-radius: 10px;
+  border: 1px solid #cbd5e1;
+  padding: 0 12px;
+  font-size: 14px;
+}
+
+.search-btn {
+  justify-self: center;
+  border: none;
+  border-radius: 999px;
+  background: #1d4ed8;
+  color: #fff;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.error {
+  margin: 0;
+  text-align: center;
+  color: #b91c1c;
+  font-size: 12px;
+}
+
+.quick-actions {
+  background: #fff;
+  border: 1px solid #d9e3f2;
+  border-radius: 16px;
+  padding: 16px;
+}
+
+.quick-actions h2 {
+  margin: 0 0 12px;
+  font-size: 20px;
+  color: #0f172a;
+}
+
+.quick-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.quick-grid button {
+  border: none;
+  border-radius: 12px;
+  background: #0ea5e9;
+  color: #fff;
+  padding: 16px 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+@media (max-width: 860px) {
+  .top-nav {
+    padding: 0 14px;
+  }
+
+  .brand {
+    font-size: 26px;
+  }
+
+  .hero h1 {
+    font-size: 30px;
+  }
+
+  .quick-grid {
+    grid-template-columns: 1fr;
+  }
+}

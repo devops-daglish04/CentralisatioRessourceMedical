@@ -19,7 +19,7 @@ class ResourceViewSet(viewsets.ModelViewSet):
         user = self.request.user
         if (
             user.is_authenticated
-            and getattr(user, "role", None) == "STRUCTURE_ADMIN"
+            and getattr(user, "role", None) in {"STRUCTURE_ADMIN", "ADMIN_STRUCTURE"}
         ):
             if user.structure_id is None:
                 return qs.none()
@@ -30,7 +30,7 @@ class ResourceViewSet(viewsets.ModelViewSet):
         user = self.request.user
         if (
             user.is_authenticated
-            and getattr(user, "role", None) == "STRUCTURE_ADMIN"
+            and getattr(user, "role", None) in {"STRUCTURE_ADMIN", "ADMIN_STRUCTURE"}
         ):
             if user.structure_id is None:
                 raise ValidationError(
@@ -48,6 +48,8 @@ class ResourceViewSet(viewsets.ModelViewSet):
                     "quantity": resource.quantity,
                     "unit": resource.unit,
                     "status": resource.status,
+                    "blood_group": resource.blood_group,
+                    "availability": resource.availability,
                 },
             )
             return
@@ -63,6 +65,8 @@ class ResourceViewSet(viewsets.ModelViewSet):
                 "quantity": resource.quantity,
                 "unit": resource.unit,
                 "status": resource.status,
+                "blood_group": resource.blood_group,
+                "availability": resource.availability,
             },
         )
 
@@ -75,11 +79,13 @@ class ResourceViewSet(viewsets.ModelViewSet):
             "quantity": previous.quantity,
             "unit": previous.unit,
             "status": previous.status,
+            "blood_group": previous.blood_group,
+            "availability": previous.availability,
         }
         user = self.request.user
         if (
             user.is_authenticated
-            and getattr(user, "role", None) == "STRUCTURE_ADMIN"
+            and getattr(user, "role", None) in {"STRUCTURE_ADMIN", "ADMIN_STRUCTURE"}
         ):
             if user.structure_id is None:
                 raise ValidationError(
@@ -93,6 +99,8 @@ class ResourceViewSet(viewsets.ModelViewSet):
                 "quantity": resource.quantity,
                 "unit": resource.unit,
                 "status": resource.status,
+                "blood_group": resource.blood_group,
+                "availability": resource.availability,
             }
             create_audit_log(
                 request=self.request,
@@ -110,6 +118,8 @@ class ResourceViewSet(viewsets.ModelViewSet):
             "quantity": resource.quantity,
             "unit": resource.unit,
             "status": resource.status,
+            "blood_group": resource.blood_group,
+            "availability": resource.availability,
         }
         create_audit_log(
             request=self.request,
@@ -128,6 +138,8 @@ class ResourceViewSet(viewsets.ModelViewSet):
             "quantity": instance.quantity,
             "unit": instance.unit,
             "status": instance.status,
+            "blood_group": instance.blood_group,
+            "availability": instance.availability,
         }
         create_audit_log(
             request=self.request,

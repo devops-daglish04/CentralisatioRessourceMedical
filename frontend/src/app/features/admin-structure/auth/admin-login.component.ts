@@ -36,12 +36,19 @@ export class AdminLoginComponent {
       next: (tokens) => {
         this.auth.setTokens(tokens.access, tokens.refresh);
         this.isLoading.set(false);
-        if (this.auth.hasRole('SUPER_ADMIN')) {
-          void this.router.navigateByUrl('/super-admin');
+        const roleFromResponse = tokens.role;
+        const role = roleFromResponse || this.auth.getRole();
+        if (role === 'SUPER_ADMIN' || this.auth.hasRole('SUPER_ADMIN')) {
+          void this.router.navigateByUrl('/super-admin/dashboard');
           return;
         }
-        if (this.auth.hasRole('STRUCTURE_ADMIN')) {
-          void this.router.navigateByUrl('/admin/resources');
+        if (
+          role === 'ADMIN_STRUCTURE' ||
+          role === 'STRUCTURE_ADMIN' ||
+          this.auth.hasRole('ADMIN_STRUCTURE') ||
+          this.auth.hasRole('STRUCTURE_ADMIN')
+        ) {
+          void this.router.navigateByUrl('/structure-admin/dashboard');
           return;
         }
         this.auth.clearTokens();

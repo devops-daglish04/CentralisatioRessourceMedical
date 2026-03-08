@@ -19,6 +19,13 @@ export const routes: Routes = [
       )
   },
   {
+    path: 'structure-admin',
+    loadChildren: () =>
+      import('./features/admin-structure/admin-structure.routes').then(
+        (m) => m.STRUCTURE_ADMIN_ROUTES
+      )
+  },
+  {
     path: 'super-admin',
     loadChildren: () =>
       import('./features/super-admin/super-admin.routes').then(

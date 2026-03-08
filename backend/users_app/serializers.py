@@ -11,13 +11,23 @@ class UserSerializer(serializers.ModelSerializer):
         trim_whitespace=False,
     )
     structure_name = serializers.CharField(source="structure.name", read_only=True)
+    structure_type = serializers.ChoiceField(
+        choices=["Hopital", "Pharmacie", "Banque"],
+        write_only=True,
+        required=False,
+        allow_blank=True,
+    )
 
     def validate(self, attrs):
         role = attrs.get("role", getattr(self.instance, "role", None))
+        if role == User.Roles.STRUCTURE_ADMIN:
+            role = User.Roles.ADMIN_STRUCTURE
+            attrs["role"] = User.Roles.ADMIN_STRUCTURE
         structure = attrs.get("structure", getattr(self.instance, "structure", None))
+        structure_type = attrs.pop("structure_type", "").strip()
         email = attrs.get("email", getattr(self.instance, "email", "")).strip().lower()
 
-        if role in {User.Roles.SUPER_ADMIN, User.Roles.STRUCTURE_ADMIN} and not email:
+        if role in {User.Roles.SUPER_ADMIN, User.Roles.ADMIN_STRUCTURE} and not email:
             raise serializers.ValidationError(
                 {"email": "Un email est requis pour les comptes administrateurs."}
             )
@@ -32,12 +42,23 @@ class UserSerializer(serializers.ModelSerializer):
                 )
             attrs["email"] = email
 
-        if role == "STRUCTURE_ADMIN" and structure is None:
+        if role == User.Roles.ADMIN_STRUCTURE and structure is None:
             raise serializers.ValidationError(
-                {"structure": "Une structure est requise pour un compte STRUCTURE_ADMIN."}
+                {"structure": "Une structure est requise pour un compte ADMIN_STRUCTURE."}
             )
-        if role != "STRUCTURE_ADMIN":
+        if role != User.Roles.ADMIN_STRUCTURE:
             attrs["structure"] = None
+
+        if role == User.Roles.ADMIN_STRUCTURE and structure_type:
+            if structure is None or structure.type != structure_type:
+                raise serializers.ValidationError(
+                    {
+                        "structure_type": (
+                            "Le type de structure sélectionné ne correspond pas "
+                            "à la structure rattachée."
+                        )
+                    }
+                )
         return attrs
 
     def create(self, validated_data):
@@ -73,6 +94,28 @@ class UserSerializer(serializers.ModelSerializer):
             "structure_name",
             "password",
             "is_active",
+            "profile_picture",
+            "structure_type",
+        ]
+
+
+class UserSelfSerializer(serializers.ModelSerializer):
+    def validate_email(self, value: str) -> str:
+        email = value.strip().lower()
+        if not email:
+            raise serializers.ValidationError("Un email valide est requis.")
+        qs = User.objects.filter(email__iexact=email).exclude(pk=self.instance.pk)
+        if qs.exists():
+            raise serializers.ValidationError("Cet email est déjà utilisé.")
+        return email
+
+    class Meta:
+        model = User
+        fields = [
+            "id",
+            "username",
+            "email",
+            "profile_picture",
         ]
 
 

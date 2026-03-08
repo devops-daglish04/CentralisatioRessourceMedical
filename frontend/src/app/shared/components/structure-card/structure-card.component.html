@@ -1,0 +1,35 @@
+<article class="structure-card">
+  <div class="card-head">
+    <div>
+      <h3>{{ structure.name }}</h3>
+      <p>{{ structure.address }}</p>
+    </div>
+    <strong>{{ structure.distance | number: '1.1-1' }} km</strong>
+  </div>
+
+  <div class="status-line">
+    <span class="status-pill" [class.status-pill--ok]="structure.availability">
+      {{ structure.availability ? 'Disponible' : 'Rupture' }}
+    </span>
+    <span
+      *ngIf="structure.blood_groups.length > 0"
+      class="status-pill status-pill--blood"
+      title="Groupes sanguins"
+    >
+      {{ structure.blood_groups.join(', ') }}
+    </span>
+  </div>
+
+  <ul class="resources">
+    <li *ngFor="let resource of structure.resources">
+      <span>{{ resource.resource_type }} - {{ resource.name_or_group }}</span>
+      <span>{{ resource.quantity }} {{ resource.unit }}</span>
+    </li>
+  </ul>
+
+  <div class="card-actions">
+    <button type="button" (click)="onViewDetails()">Voir details</button>
+    <button type="button" class="secondary" (click)="onFocusMap()">Voir sur la carte</button>
+    <a [href]="itineraryLink()" target="_blank" rel="noopener">Itineraire</a>
+  </div>
+</article>

@@ -115,7 +115,7 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
     }
 
     this.structures.forEach((structure) => {
-      const [lng, lat] = structure.location.coordinates;
+      const [lat, lng] = this.toLatLng(structure);
       const isFocused = this.focusStructureId === structure.id;
       const marker = L.marker([lat, lng], {
         icon: L.divIcon({
@@ -128,11 +128,7 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
 
       marker
         .bindPopup(
-          `<div class="text-sm font-semibold mb-1">${structure.name}</div>
-           <div class="text-xs text-slate-600 mb-1">${structure.distance.toFixed(1)} km</div>
-           <div class="text-xs text-slate-600">Ressources critiques : ${
-             structure.resources.length
-           }</div>`
+          this.buildPopupHtml(structure, lat, lng)
         )
         .addTo(clusterLayer);
     });
@@ -140,7 +136,7 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
     if (this.focusStructureId) {
       const focused = this.structures.find((s) => s.id === this.focusStructureId);
       if (focused) {
-        const [lng, lat] = focused.location.coordinates;
+        const [lat, lng] = this.toLatLng(focused);
         this.map.setView([lat, lng], 16, { animate: true });
       }
       return;
@@ -161,7 +157,7 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
     }
 
     for (const structure of this.structures) {
-      const [lng, lat] = structure.location.coordinates;
+      const [lat, lng] = this.toLatLng(structure);
       points.push([lat, lng]);
     }
 
@@ -194,6 +190,34 @@ export class MapComponent implements AfterViewInit, OnChanges, OnDestroy {
       maxNativeZoom: 20,
       attribution: ''
     }).addTo(this.map);
+  }
+
+  private toLatLng(structure: StructureSearchResult): [number, number] {
+    if (Number.isFinite(structure.latitude) && Number.isFinite(structure.longitude)) {
+      return [structure.latitude, structure.longitude];
+    }
+    const [lng, lat] = structure.location.coordinates;
+    return [lat, lng];
+  }
+
+  private buildPopupHtml(structure: StructureSearchResult, lat: number, lng: number): string {
+    const resources = structure.resources
+      .slice(0, 2)
+      .map((item) => `${item.resource_type}: ${item.name_or_group}`)
+      .join(' | ');
+    const itinerary = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+    const details = `/public/structure/${structure.id}`;
+    return `
+      <div style="min-width:220px;font-family:Arial,sans-serif;">
+        <div style="font-weight:700;margin-bottom:6px;">${structure.name}</div>
+        <div style="font-size:12px;color:#475569;margin-bottom:4px;">${structure.distance.toFixed(1)} km</div>
+        <div style="font-size:12px;color:#475569;margin-bottom:8px;">${resources || 'Ressources non renseignees'}</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          <a href="${details}" style="padding:6px 10px;border-radius:999px;background:#1d4ed8;color:white;text-decoration:none;font-size:12px;">Voir details</a>
+          <a href="${itinerary}" target="_blank" rel="noopener" style="padding:6px 10px;border-radius:999px;background:#e2e8f0;color:#1e293b;text-decoration:none;font-size:12px;">Itineraire</a>
+        </div>
+      </div>
+    `;
   }
 }
 

@@ -26,6 +26,17 @@ class Resource(models.Model):
         (OUT_OF_STOCK, "Rupture"),
     ]
 
+    BLOOD_GROUP_CHOICES = [
+        ("A+", "A+"),
+        ("A-", "A-"),
+        ("B+", "B+"),
+        ("B-", "B-"),
+        ("AB+", "AB+"),
+        ("AB-", "AB-"),
+        ("O+", "O+"),
+        ("O-", "O-"),
+    ]
+
     structure = models.ForeignKey(
         Structure,
         related_name="resources",
@@ -39,6 +50,12 @@ class Resource(models.Model):
     quantity = models.PositiveIntegerField(default=0)
     unit = models.CharField(max_length=64)
     status = models.CharField(max_length=32, choices=STATUS_CHOICES)
+    blood_group = models.CharField(
+        max_length=3,
+        choices=BLOOD_GROUP_CHOICES,
+        blank=True,
+        help_text="Groupe sanguin (optionnel, principalement pour les ressources Sang).",
+    )
     last_updated = models.DateTimeField(auto_now=True)
 
     class Meta:
@@ -51,5 +68,9 @@ class Resource(models.Model):
 
     def __str__(self) -> str:
         return f"{self.resource_type} - {self.name_or_group} ({self.structure.name})"
+
+    @property
+    def availability(self) -> bool:
+        return self.status != self.OUT_OF_STOCK and self.quantity > 0
 
 

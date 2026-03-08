@@ -1,0 +1,41 @@
+<div class="details-page">
+  <a routerLink="/public/results" class="back-link">← Retour aux resultats</a>
+
+  <div *ngIf="isLoading()" class="state-card">Chargement...</div>
+  <div *ngIf="errorMessage()" class="state-card state-card--error">{{ errorMessage() }}</div>
+
+  <ng-container *ngIf="!isLoading() && !errorMessage() && structure() as structure">
+    <header class="details-header">
+      <h1>{{ structure.name }}</h1>
+      <p>{{ structure.type }} - {{ structure.address }}</p>
+      <p>Contact: {{ structure.contact_phone || 'Non renseigne' }}</p>
+    </header>
+
+    <section class="resources-card">
+      <h2>Ressources disponibles</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Type</th>
+            <th>Nom / Groupe</th>
+            <th>Quantite</th>
+            <th>Unite</th>
+            <th>Statut</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let resource of resources()">
+            <td>{{ resource.resource_type }}</td>
+            <td>{{ resource.blood_group || resource.name_or_group }}</td>
+            <td>{{ resource.quantity }}</td>
+            <td>{{ resource.unit }}</td>
+            <td>{{ resource.status }}</td>
+          </tr>
+          <tr *ngIf="resources().length === 0">
+            <td colspan="5">Aucune ressource renseignée.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+  </ng-container>
+</div>
