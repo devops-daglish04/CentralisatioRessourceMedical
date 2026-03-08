@@ -1,0 +1,226 @@
+<div class="superadmin-page">
+  <aside class="super-sidebar">
+    <div class="brand-block">
+      <h2>AdminPlateforme</h2>
+      <p>Vue globale</p>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a class="nav-item nav-item-active" href="javascript:void(0)">Structures</a>
+      <a class="nav-item" href="javascript:void(0)">Comptes admins</a>
+      <a class="nav-item" href="javascript:void(0)">Audit</a>
+      <a class="nav-item" href="javascript:void(0)">Parametres</a>
+    </nav>
+
+    <div class="sidebar-bottom"></div>
+  </aside>
+
+  <section class="super-content">
+    <header class="super-topbar">
+      <h1>Admin Plateforme — Gestion des structures + audit</h1>
+    </header>
+
+    <main class="super-main">
+      <section class="structures-panel">
+        <div class="panel-header">
+          <h2>Structures</h2>
+          <button type="button" class="btn btn-primary" (click)="openCreateStructureModal()">
+            Creer une structure
+          </button>
+        </div>
+
+        <button type="button" class="btn btn-primary btn-left" (click)="openCreateStructureModal()">
+          Creer une structure
+        </button>
+
+        <div class="filters-row">
+          <input
+            type="text"
+            placeholder="Recherche"
+            [(ngModel)]="searchTerm"
+            class="filter-input search-input"
+          />
+          <select [(ngModel)]="selectedType" class="filter-input select-input">
+            <option value="ALL">Type</option>
+            <option *ngFor="let type of availableTypes" [value]="type">{{ type }}</option>
+          </select>
+          <select [(ngModel)]="selectedCity" class="filter-input select-input">
+            <option value="ALL">Ville</option>
+            <option *ngFor="let city of availableCities" [value]="city">{{ city }}</option>
+          </select>
+        </div>
+
+        <div class="table-shell">
+          <table class="structures-table">
+            <thead>
+              <tr>
+                <th>Nom</th>
+                <th>Type</th>
+                <th>Ville</th>
+                <th>Statut</th>
+                <th>Derniere MAJ</th>
+                <th class="actions-header">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngIf="isLoading">
+                <td colspan="6" class="empty-row">Chargement...</td>
+              </tr>
+              <tr *ngFor="let structure of filteredStructures; trackBy: trackByStructure">
+                <td class="name-cell">{{ structure.name }}</td>
+                <td>{{ structure.type }}</td>
+                <td>{{ structure.address.split(',').pop()?.trim() || '-' }}</td>
+                <td>
+                  <span [class]="structureStatusClass(structure.is_active)">
+                    {{ structure.is_active ? 'Actif' : 'Inactif' }}
+                  </span>
+                </td>
+                <td>{{ getLastUpdateForStructure(structure.id) }}</td>
+                <td class="actions-cell">
+                  <button type="button" class="icon-btn" title="Voir" (click)="openViewStructureModal(structure)">
+                    &#128065;
+                  </button>
+                  <button
+                    type="button"
+                    class="icon-btn"
+                    title="Modifier"
+                    (click)="openEditStructureModal(structure)"
+                  >
+                    &#9998;
+                  </button>
+                  <button
+                    type="button"
+                    class="icon-btn icon-btn-danger"
+                    title="Supprimer"
+                    (click)="requestDeleteStructure(structure)"
+                  >
+                    &#128465;
+                  </button>
+                </td>
+              </tr>
+              <tr *ngIf="!isLoading && filteredStructures.length === 0">
+                <td colspan="6" class="empty-row">Aucune structure ne correspond aux filtres.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="admin-row">
+          <div class="admin-inputs">
+            <div class="field">
+              <label>Email</label>
+              <input type="email" [(ngModel)]="adminDraft.email" />
+            </div>
+            <div class="field">
+              <label>Nom</label>
+              <input type="text" [(ngModel)]="adminDraft.username" />
+            </div>
+            <div class="field">
+              <label>Structure associee</label>
+              <select [(ngModel)]="adminDraft.structureId">
+                <option [ngValue]="null">Structure associee</option>
+                <option *ngFor="let structure of structures; trackBy: trackByStructure" [ngValue]="structure.id">
+                  {{ structure.name }}
+                </option>
+              </select>
+            </div>
+          </div>
+
+          <div class="create-admin-card">
+            <h3>Creer admin de structure</h3>
+            <button type="button" class="btn btn-primary" [disabled]="isSavingAdmin" (click)="createStructureAdmin()">
+              {{ isSavingAdmin ? 'Creation...' : 'Creer' }}
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <aside class="audit-panel">
+        <h3>Audit recent</h3>
+        <div class="audit-timeline">
+          <div *ngFor="let audit of audits; trackBy: trackByAudit" class="audit-item">
+            <div class="audit-dot"></div>
+            <div class="audit-content">
+              <p class="audit-text">
+                <strong>{{ formatAuditActor(audit) }}</strong>
+                {{ formatAuditAction(audit.action) }}
+              </p>
+              <p class="audit-meta">{{ formatTimestamp(audit.timestamp) }}</p>
+              <span class="detail-link">Details</span>
+            </div>
+          </div>
+          <p *ngIf="audits.length === 0 && !isLoading" class="empty-audit">Aucun log d'audit.</p>
+        </div>
+      </aside>
+    </main>
+  </section>
+</div>
+
+<div *ngIf="structureModalOpen" class="modal-backdrop">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3>{{ structureModalTitle }}</h3>
+      <button type="button" class="close-btn" (click)="closeStructureModal()">&#10005;</button>
+    </div>
+
+    <div class="modal-form-grid">
+      <label>
+        Nom
+        <input type="text" [(ngModel)]="structureDraft.name" [disabled]="isStructureFormReadOnly" />
+      </label>
+      <label>
+        Type
+        <select [(ngModel)]="structureDraft.type" [disabled]="isStructureFormReadOnly">
+          <option value="Hopital">Hopital</option>
+          <option value="Pharmacie">Pharmacie</option>
+          <option value="Banque">Banque de sang</option>
+        </select>
+      </label>
+      <label>
+        Ville
+        <input type="text" [(ngModel)]="structureDraft.city" [disabled]="isStructureFormReadOnly" />
+      </label>
+      <label>
+        Adresse
+        <input type="text" [(ngModel)]="structureDraft.addressLine" [disabled]="isStructureFormReadOnly" />
+      </label>
+      <label>
+        Contact
+        <input type="text" [(ngModel)]="structureDraft.contactPhone" [disabled]="isStructureFormReadOnly" />
+      </label>
+      <label>
+        Statut
+        <select [(ngModel)]="structureDraft.isActive" [disabled]="isStructureFormReadOnly">
+          <option [ngValue]="true">Actif</option>
+          <option [ngValue]="false">Inactif</option>
+        </select>
+      </label>
+    </div>
+
+    <div class="modal-actions">
+      <button type="button" class="btn btn-light" (click)="closeStructureModal()">Fermer</button>
+      <button
+        *ngIf="!isStructureFormReadOnly"
+        type="button"
+        class="btn btn-primary"
+        [disabled]="isSavingStructure"
+        (click)="saveStructure()"
+      >
+        {{ isSavingStructure ? 'Enregistrement...' : structureModalActionLabel }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="pendingDelete" class="modal-backdrop danger-backdrop">
+  <div class="confirm-card">
+    <h3>Supprimer la structure</h3>
+    <p>Confirmer la suppression de <strong>{{ pendingDelete.name }}</strong> ?</p>
+    <div class="modal-actions">
+      <button type="button" class="btn btn-light" (click)="cancelDeleteStructure()">Annuler</button>
+      <button type="button" class="btn btn-danger" [disabled]="isDeletingStructure" (click)="confirmDeleteStructure()">
+        {{ isDeletingStructure ? 'Suppression...' : 'Supprimer' }}
+      </button>
+    </div>
+  </div>
+</div>

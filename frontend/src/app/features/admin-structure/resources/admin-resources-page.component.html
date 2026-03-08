@@ -1,0 +1,220 @@
+<div class="grid grid-cols-[2fr,1fr] gap-6">
+  <!-- Top resource summary cards -->
+  <div class="col-span-2 grid grid-cols-4 gap-4 mb-4">
+    <div class="bg-white rounded-2xl border border-slate-100 px-4 py-3 flex flex-col gap-1">
+      <div class="flex items-center gap-2">
+        <div class="h-9 w-9 rounded-xl bg-rose-50 flex items-center justify-center">
+          <span>🩸</span>
+        </div>
+        <span class="text-sm font-semibold text-slate-900">Sang</span>
+      </div>
+      <div class="text-xs mt-1">
+        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 text-[11px]">
+          <span class="text-[10px]">▲</span> Faible
+        </span>
+      </div>
+      <p class="text-sm text-slate-800 font-semibold mt-1">
+        {{ totalBlood() }} unités
+      </p>
+      <p class="text-[11px] text-slate-500">MAJ : 08:45</p>
+    </div>
+
+    <div class="bg-white rounded-2xl border border-slate-100 px-4 py-3 flex flex-col gap-1">
+      <div class="flex items-center gap-2">
+        <div class="h-9 w-9 rounded-xl bg-emerald-50 flex items-center justify-center">
+          <span>🧪</span>
+        </div>
+        <span class="text-sm font-semibold text-slate-900">Oxygène</span>
+      </div>
+      <div class="text-xs mt-1">
+        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[11px]">
+          Disponible
+        </span>
+      </div>
+      <p class="text-sm text-slate-800 font-semibold mt-1">
+        {{ totalOxygen() }} unités
+      </p>
+      <p class="text-[11px] text-slate-500">MAJ : 09:15</p>
+    </div>
+
+    <div class="bg-white rounded-2xl border border-slate-100 px-4 py-3 flex flex-col gap-1">
+      <div class="flex items-center gap-2">
+        <div class="h-9 w-9 rounded-xl bg-sky-50 flex items-center justify-center">
+          <span>👶</span>
+        </div>
+        <span class="text-sm font-semibold text-slate-900">Couveuses</span>
+      </div>
+      <div class="text-xs mt-1">
+        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[11px]">
+          Disponible
+        </span>
+      </div>
+      <p class="text-sm text-slate-800 font-semibold mt-1">
+        {{ totalIncubator() }} unités
+      </p>
+      <p class="text-[11px] text-slate-500">MAJ : 09:00</p>
+    </div>
+
+    <div class="bg-white rounded-2xl border border-slate-100 px-4 py-3 flex flex-col gap-1">
+      <div class="flex items-center gap-2">
+        <div class="h-9 w-9 rounded-xl bg-rose-50 flex items-center justify-center">
+          <span>💊</span>
+        </div>
+        <span class="text-sm font-semibold text-slate-900">Médicaments</span>
+      </div>
+      <div class="text-xs mt-1">
+        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 text-[11px]">
+          Rupture
+        </span>
+      </div>
+      <p class="text-sm text-slate-800 font-semibold mt-1">
+        {{ totalMedicine() }} unités
+      </p>
+      <p class="text-[11px] text-slate-500">MAJ : 08:30</p>
+    </div>
+  </div>
+
+  <!-- Stocks table -->
+  <section class="bg-white rounded-2xl border border-slate-100 px-5 py-4">
+    <h2 class="text-sm font-semibold text-slate-900 mb-3">Stocks</h2>
+
+    <div class="overflow-x-auto">
+      <table class="w-full text-xs text-left border-separate border-spacing-y-1">
+        <thead class="text-[11px] text-slate-500">
+          <tr>
+            <th class="py-2">Ressource</th>
+            <th>Variante</th>
+            <th class="text-right">Quantité</th>
+            <th>Unité</th>
+            <th>Statut</th>
+            <th>Expiration (optionnel)</th>
+            <th>Dernière MAJ</th>
+            <th class="w-16 text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="align-middle">
+          <tr *ngIf="isLoading()">
+            <td colspan="8" class="py-4 text-center text-slate-500">Chargement...</td>
+          </tr>
+          <tr *ngFor="let resource of resources(); trackBy: trackById" class="bg-slate-50">
+            <td class="py-2 px-1 rounded-l-lg">{{ resource.resource_type }}</td>
+            <td>{{ resource.name_or_group }}</td>
+            <td class="text-right">{{ resource.quantity }}</td>
+            <td>{{ resource.unit }}</td>
+            <td>
+              <span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[11px]">
+                {{ resource.status }}
+              </span>
+            </td>
+            <td>-</td>
+            <td>{{ resource.last_updated | date: 'short' }}</td>
+            <td class="rounded-r-lg text-right space-x-2 text-slate-400">
+              —
+            </td>
+          </tr>
+          <tr *ngIf="!isLoading() && resources().length === 0">
+            <td colspan="8" class="py-4 text-center text-slate-500">Aucune ressource disponible.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div
+      class="mt-4 rounded-md bg-amber-50 text-amber-800 text-[11px] px-3 py-2 border border-amber-100"
+    >
+      Les actions sont journalisées pour des raisons de sécurité et de traçabilité.
+    </div>
+  </section>
+
+  <!-- Form -->
+  <section class="bg-white rounded-2xl border border-slate-100 px-5 py-4">
+    <h2 class="text-sm font-semibold text-slate-900 mb-3">Ajouter / Modifier</h2>
+
+    <form class="flex flex-col gap-3 text-xs" (ngSubmit)="onSubmit()">
+      <div class="flex flex-col gap-1">
+        <label class="text-slate-700">Type</label>
+        <select
+          name="resource_type"
+          [(ngModel)]="form.resource_type"
+          class="h-8 rounded-md border border-slate-200 px-2 outline-none focus:ring-2 focus:ring-primary/60 focus:border-primary text-xs"
+        >
+          <option>Sang</option>
+          <option value="Oxygene">Oxygène</option>
+          <option value="Couveuse">Couveuse</option>
+          <option value="Medicament">Médicament</option>
+        </select>
+      </div>
+
+      <div class="flex gap-3">
+        <div class="flex-1 flex flex-col gap-1">
+          <label class="text-slate-700">Variante / Groupe</label>
+          <input
+            name="name_or_group"
+            [(ngModel)]="form.name_or_group"
+            class="h-8 rounded-md border border-slate-200 px-2 outline-none focus:ring-2 focus:ring-primary/60 focus:border-primary text-xs"
+          />
+        </div>
+        <div class="w-24 flex flex-col gap-1">
+          <label class="text-slate-700">Quantité</label>
+          <input
+            type="number"
+            name="quantity"
+            [(ngModel)]="form.quantity"
+            class="h-8 rounded-md border border-slate-200 px-2 outline-none focus:ring-2 focus:ring-primary/60 focus:border-primary text-xs"
+          />
+        </div>
+        <div class="w-28 flex flex-col gap-1">
+          <label class="text-slate-700">Unité</label>
+          <input
+            name="unit"
+            [(ngModel)]="form.unit"
+            class="h-8 rounded-md border border-slate-200 px-2 outline-none focus:ring-2 focus:ring-primary/60 focus:border-primary text-xs"
+          />
+        </div>
+      </div>
+
+      <div class="flex gap-3">
+        <div class="flex-1 flex flex-col gap-1">
+          <label class="text-slate-700">Date d'expiration</label>
+          <input
+            type="date"
+            class="h-8 rounded-md border border-slate-200 px-2 outline-none focus:ring-2 focus:ring-primary/60 focus:border-primary text-xs"
+          />
+        </div>
+        <div class="flex-1 flex flex-col gap-1">
+          <label class="text-slate-700">Statut</label>
+          <select
+            name="status"
+            [(ngModel)]="form.status"
+            class="h-8 rounded-md border border-slate-200 px-2 outline-none focus:ring-2 focus:ring-primary/60 focus:border-primary text-xs"
+          >
+            <option>Disponible</option>
+            <option value="Critique">Critique</option>
+            <option>Rupture</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-1">
+        <label class="text-slate-700">Commentaire (optionnel)</label>
+        <textarea
+          rows="3"
+          class="rounded-md border border-slate-200 px-2 py-1 outline-none focus:ring-2 focus:ring-primary/60 focus:border-primary text-xs resize-none"
+        ></textarea>
+      </div>
+
+      <button
+        type="submit"
+        [disabled]="isSaving()"
+        class="mt-2 h-9 rounded-md bg-primary text-white text-xs font-semibold shadow-md hover:bg-blue-700 transition-colors"
+      >
+        {{ isSaving() ? 'Enregistrement...' : 'Enregistrer' }}
+      </button>
+
+      <p *ngIf="errorMessage()" class="text-[11px] text-red-600">{{ errorMessage() }}</p>
+      <p *ngIf="successMessage()" class="text-[11px] text-emerald-700">{{ successMessage() }}</p>
+    </form>
+  </section>
+</div>
+
+

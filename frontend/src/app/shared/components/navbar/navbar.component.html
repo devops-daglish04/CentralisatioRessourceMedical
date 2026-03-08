@@ -1,0 +1,46 @@
+<header
+  class="w-full h-20 bg-white shadow-sm flex items-center justify-between px-10 gap-8"
+>
+  <div class="flex items-center gap-3">
+    <div class="flex items-center gap-2">
+      <div class="h-8 w-8 rounded-md bg-primary flex items-center justify-center">
+        <span class="text-white font-bold text-xl">M</span>
+      </div>
+      <span class="text-lg font-semibold text-slate-900">MediCentral</span>
+    </div>
+  </div>
+
+  <div class="flex-1 max-w-3xl mx-8">
+    <div
+      class="flex items-center bg-slate-100 rounded-full px-5 py-2 border border-slate-200"
+    >
+      <span class="text-slate-400 mr-3 text-sm">🔍</span>
+      <input
+        class="flex-1 bg-transparent outline-none text-sm text-slate-800 placeholder:text-slate-400"
+        type="text"
+        placeholder="Rechercher une structure, une ressource, une maladie..."
+      />
+    </div>
+  </div>
+
+  <div class="flex items-center gap-4">
+    <button
+      type="button"
+      class="flex items-center gap-2 text-sm text-primary border border-primary rounded-full px-4 py-2 bg-white hover:bg-blue-50 transition-colors"
+      (click)="onLocateClick()"
+    >
+      <span class="text-base">📍</span>
+      <span>Ma position</span>
+    </button>
+
+    <button
+      type="button"
+      routerLink="/admin/login"
+      class="px-5 py-2 rounded-full bg-primary text-white text-sm font-medium shadow-sm hover:bg-blue-700 transition-colors"
+    >
+      Connexion
+    </button>
+  </div>
+</header>
+
+
