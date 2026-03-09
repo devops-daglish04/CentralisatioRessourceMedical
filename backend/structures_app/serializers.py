@@ -41,6 +41,13 @@ class ServiceSerializer(serializers.ModelSerializer):
 
 class StructureSerializer(serializers.ModelSerializer):
     services = ServiceSerializer(many=True, read_only=True)
+    service_ids = serializers.PrimaryKeyRelatedField(
+        source="services",
+        queryset=Service.objects.all(),
+        many=True,
+        write_only=True,
+        required=False,
+    )
 
     class Meta:
         model = Structure
@@ -51,8 +58,10 @@ class StructureSerializer(serializers.ModelSerializer):
             "address",
             "contact_phone",
             "is_active",
+            "created_at",
             "location",
             "services",
+            "service_ids",
         ]
 
 
@@ -131,6 +140,7 @@ class StructureSearchResultSerializer(serializers.ModelSerializer):
             "address",
             "contact_phone",
             "is_active",
+            "created_at",
             "location",
             "distance",
             "distance_m",

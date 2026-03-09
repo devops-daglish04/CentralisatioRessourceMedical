@@ -1,0 +1,29 @@
+<section class="card">
+  <h2>Services & maladies</h2>
+  <p *ngIf="structure()">Structure: {{ structure()?.name }}</p>
+
+  <div *ngIf="isLoading()" class="state">Chargement...</div>
+
+  <div *ngIf="!isLoading()" class="services-grid">
+    <label *ngFor="let service of services(); trackBy: trackByServiceId" class="service-item">
+      <input
+        type="checkbox"
+        [checked]="isSelected(service.id)"
+        (change)="onToggleService(service.id)"
+      />
+      <div>
+        <strong>{{ service.name }}</strong>
+        <small *ngIf="service.diseases.length > 0">
+          Maladies: {{ diseaseNames(service) }}
+        </small>
+        <small *ngIf="service.diseases.length === 0">Aucune maladie liée.</small>
+      </div>
+    </label>
+  </div>
+
+  <button type="button" (click)="saveServices()" [disabled]="isSaving() || isLoading()">
+    {{ isSaving() ? 'Enregistrement...' : 'Enregistrer les services' }}
+  </button>
+
+  <p *ngIf="message()" class="message">{{ message() }}</p>
+</section>

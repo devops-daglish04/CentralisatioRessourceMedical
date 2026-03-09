@@ -1,5 +1,7 @@
 from rest_framework import serializers
 
+from backend.structures_app.models import Structure
+
 from .models import User
 
 
@@ -12,7 +14,7 @@ class UserSerializer(serializers.ModelSerializer):
     )
     structure_name = serializers.CharField(source="structure.name", read_only=True)
     structure_type = serializers.ChoiceField(
-        choices=["Hopital", "Pharmacie", "Banque"],
+        choices=["Hopital", "Clinique", "Pharmacie", "Banque"],
         write_only=True,
         required=False,
         allow_blank=True,
@@ -117,5 +119,31 @@ class UserSelfSerializer(serializers.ModelSerializer):
             "email",
             "profile_picture",
         ]
+
+
+class CreateStructureAdminSerializer(serializers.Serializer):
+    admin_name = serializers.CharField(max_length=150)
+    email = serializers.EmailField()
+    password = serializers.CharField(min_length=8, trim_whitespace=False)
+    is_active = serializers.BooleanField(default=True)
+
+    structure_name = serializers.CharField(max_length=255)
+    structure_type = serializers.ChoiceField(
+        choices=[choice for choice, _ in Structure.TYPE_CHOICES]
+    )
+    city = serializers.CharField(max_length=255)
+    address = serializers.CharField(max_length=512)
+    phone = serializers.CharField(max_length=50, allow_blank=True, required=False)
+    latitude = serializers.FloatField()
+    longitude = serializers.FloatField()
+
+    def validate(self, attrs):
+        latitude = attrs["latitude"]
+        longitude = attrs["longitude"]
+        if not (-90 <= latitude <= 90):
+            raise serializers.ValidationError({"latitude": "Latitude invalide."})
+        if not (-180 <= longitude <= 180):
+            raise serializers.ValidationError({"longitude": "Longitude invalide."})
+        return attrs
 
 

@@ -1,4 +1,4 @@
-export type StructureTypeFilter = '' | 'Hopital' | 'Pharmacie' | 'Banque';
+export type StructureTypeFilter = '' | 'Hopital' | 'Clinique' | 'Pharmacie' | 'Banque';
 export type ResourceFilter = '' | 'blood' | 'medicine' | 'oxygen' | 'incubator';
 
 export interface SearchFilters {

@@ -4,11 +4,13 @@ from django.db import models
 
 class Structure(gis_models.Model):
     HOSPITAL = "Hopital"
+    CLINIC = "Clinique"
     PHARMACY = "Pharmacie"
     BLOOD_BANK = "Banque"
 
     TYPE_CHOICES = [
         (HOSPITAL, "Hôpital"),
+        (CLINIC, "Clinique"),
         (PHARMACY, "Pharmacie"),
         (BLOOD_BANK, "Banque de sang"),
     ]
@@ -18,6 +20,7 @@ class Structure(gis_models.Model):
     address = models.CharField(max_length=512)
     contact_phone = models.CharField(max_length=50, blank=True)
     is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
     # PostGIS point field (longitude, latitude – WGS84)
     location = gis_models.PointField(geography=True, srid=4326)
 

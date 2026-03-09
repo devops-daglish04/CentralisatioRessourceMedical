@@ -68,6 +68,7 @@ class StructureViewSet(viewsets.ModelViewSet):
             "address": previous.address,
             "contact_phone": previous.contact_phone,
             "is_active": previous.is_active,
+            "service_ids": list(previous.services.values_list("id", flat=True)),
         }
         structure = serializer.save()
         after = {
@@ -76,6 +77,7 @@ class StructureViewSet(viewsets.ModelViewSet):
             "address": structure.address,
             "contact_phone": structure.contact_phone,
             "is_active": structure.is_active,
+            "service_ids": list(structure.services.values_list("id", flat=True)),
         }
         create_audit_log(
             request=self.request,
@@ -192,7 +194,8 @@ def _normalize_resource_type(raw_value: str | None) -> str | None:
 def _city_to_coordinates(city: str | None) -> tuple[float, float] | None:
     if not city:
         return None
-    normalized = city.strip().lower()
+    raw_city = city.strip()
+    normalized = raw_city.lower()
     city_map: dict[str, tuple[float, float]] = {
         "yaounde": (3.8667, 11.5167),
         "yaoundé": (3.8667, 11.5167),
@@ -200,7 +203,31 @@ def _city_to_coordinates(city: str | None) -> tuple[float, float] | None:
         "bafoussam": (5.4781, 10.4179),
         "garoua": (9.3265, 13.3938),
     }
-    return city_map.get(normalized)
+    if normalized in city_map:
+        return city_map[normalized]
+
+    # Fallback: infer city center from stored structures.
+    structures = list(
+        Structure.objects.filter(is_active=True)
+        .filter(Q(address__icontains=raw_city) | Q(name__icontains=raw_city))
+        .only("location")[:50]
+    )
+    if not structures:
+        return None
+
+    lat_sum = 0.0
+    lng_sum = 0.0
+    count = 0
+    for structure in structures:
+        if structure.location is None:
+            continue
+        lat_sum += float(structure.location.y)
+        lng_sum += float(structure.location.x)
+        count += 1
+
+    if count == 0:
+        return None
+    return (lat_sum / count, lng_sum / count)
 
 
 @api_view(["GET"])
@@ -243,7 +270,8 @@ def search_structures(request: Request) -> Response:
                 {
                     "detail": (
                         "Les paramètres de position sont requis: "
-                        "'lat'/'lng' ou 'latitude'/'longitude', ou une ville supportée."
+                        "'lat'/'lng' ou 'latitude'/'longitude', ou une ville "
+                        "présente dans les structures enregistrées."
                     )
                 },
                 status=status.HTTP_400_BAD_REQUEST,

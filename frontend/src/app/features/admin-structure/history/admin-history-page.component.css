@@ -1,0 +1,79 @@
+:host {
+  display: block;
+}
+
+.card {
+  background: #fff;
+  border: 1px solid #dde7f3;
+  border-radius: 14px;
+  padding: 16px;
+}
+
+h2 {
+  margin: 0;
+  font-size: 18px;
+  color: #0f172a;
+}
+
+.toolbar {
+  margin-top: 12px;
+  display: flex;
+  gap: 8px;
+}
+
+.toolbar input {
+  flex: 1;
+  height: 36px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 0 10px;
+}
+
+.toolbar button {
+  height: 36px;
+  border: none;
+  border-radius: 8px;
+  padding: 0 12px;
+  background: #1d4ed8;
+  color: #fff;
+  font-weight: 600;
+}
+
+.state {
+  margin-top: 10px;
+  font-size: 12px;
+  color: #475569;
+}
+
+.state.error {
+  color: #b91c1c;
+}
+
+.table-wrap {
+  margin-top: 12px;
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+th,
+td {
+  text-align: left;
+  padding: 8px;
+  border-top: 1px solid #e2e8f0;
+  vertical-align: top;
+}
+
+thead th {
+  border-top: none;
+  color: #475569;
+}
+
+.empty {
+  text-align: center;
+  color: #64748b;
+}

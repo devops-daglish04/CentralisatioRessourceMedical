@@ -31,6 +31,8 @@ class User(AbstractUser):
     )
 
     def save(self, *args, **kwargs):
+        if self.role == self.Roles.STRUCTURE_ADMIN:
+            self.role = self.Roles.ADMIN_STRUCTURE
         if self.is_superuser and self.role == self.Roles.PUBLIC:
             self.role = self.Roles.SUPER_ADMIN
         super().save(*args, **kwargs)

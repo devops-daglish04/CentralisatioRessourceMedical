@@ -39,11 +39,24 @@
     </section>
 
     <section class="quick-actions">
-      <h2>Acces rapide urgence</h2>
+      <h2>Accès rapide urgence</h2>
       <div class="quick-grid">
-        <button type="button" (click)="onQuickSearch('blood')">Besoin de sang</button>
-        <button type="button" (click)="onQuickSearch('medicine')">Medicament</button>
-        <button type="button" (click)="onQuickSearch('oxygen')">Oxygene</button>
+        <button type="button" class="urgent-btn blood" (click)="onQuickSearch('blood')">
+          <span class="btn-icon">🩸</span>
+          <span class="btn-text">Besoin de sang</span>
+        </button>
+        <button type="button" class="urgent-btn medicine" (click)="onQuickSearch('medicine')">
+          <span class="btn-icon">💊</span>
+          <span class="btn-text">Médicament</span>
+        </button>
+        <button type="button" class="urgent-btn oxygen" (click)="onQuickSearch('oxygen')">
+          <span class="btn-icon">🫁</span>
+          <span class="btn-text">Oxygène</span>
+        </button>
+        <button type="button" class="urgent-btn incubator" (click)="onQuickSearch('incubator')">
+          <span class="btn-icon">👶</span>
+          <span class="btn-text">Couveuse</span>
+        </button>
       </div>
     </section>
   </main>

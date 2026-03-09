@@ -4,7 +4,7 @@ export const routes: Routes = [
   {
     path: '',
     pathMatch: 'full',
-    redirectTo: 'public'
+    redirectTo: 'public/home'
   },
   {
     path: 'public',
@@ -34,6 +34,6 @@ export const routes: Routes = [
   },
   {
     path: '**',
-    redirectTo: 'public'
+    redirectTo: 'public/home'
   }
 ];

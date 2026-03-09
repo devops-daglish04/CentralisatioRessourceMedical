@@ -51,6 +51,17 @@ export interface GeoPoint {
   coordinates: [number, number];
 }
 
+export interface DiseaseItem {
+  id: number;
+  name: string;
+}
+
+export interface ServiceItem {
+  id: number;
+  name: string;
+  diseases: DiseaseItem[];
+}
+
 export interface ResourceItem {
   id: number;
   structure: number;
@@ -81,7 +92,9 @@ export interface StructureItem {
   address: string;
   contact_phone: string;
   is_active: boolean;
+  created_at?: string;
   location: GeoPoint | string | null;
+  services?: ServiceItem[];
 }
 
 export interface StructurePayload {
@@ -91,6 +104,7 @@ export interface StructurePayload {
   contact_phone: string;
   is_active: boolean;
   location: GeoPoint;
+  service_ids?: number[];
 }
 
 export interface SearchStructuresParams {
@@ -144,6 +158,20 @@ export interface UserPayload {
   structure?: number | null;
   password: string;
   is_active?: boolean;
+}
+
+export interface CreateStructureAdminPayload {
+  admin_name: string;
+  email: string;
+  password: string;
+  is_active: boolean;
+  structure_name: string;
+  structure_type: string;
+  city: string;
+  address: string;
+  phone: string;
+  latitude: number;
+  longitude: number;
 }
 
 export interface UserProfilePayload {
@@ -229,6 +257,10 @@ export class ApiService {
     return this.http.get<StructureItem[]>(`${this.baseUrl}/structures/`);
   }
 
+  getServices(): Observable<ServiceItem[]> {
+    return this.http.get<ServiceItem[]>(`${this.baseUrl}/services/`);
+  }
+
   getStructure(id: number): Observable<StructureItem> {
     return this.http.get<StructureItem>(`${this.baseUrl}/structures/${id}/`);
   }
@@ -271,6 +303,16 @@ export class ApiService {
 
   createUser(payload: UserPayload): Observable<UserItem> {
     return this.http.post<UserItem>(`${this.baseUrl}/users/`, payload);
+  }
+
+  createStructureAdmin(payload: CreateStructureAdminPayload): Observable<{
+    user: UserItem;
+    structure: StructureItem;
+  }> {
+    return this.http.post<{
+      user: UserItem;
+      structure: StructureItem;
+    }>(`${this.baseUrl}/users/create-structure-admin/`, payload);
   }
 
   updateUser(id: number, payload: Partial<UserPayload>): Observable<UserItem> {

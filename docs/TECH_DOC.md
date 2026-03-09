@@ -24,7 +24,8 @@
 - `backend/users_app/`
   - Modèle custom `User` : `backend/users_app/models.py`
     - Hérite de `AbstractUser`
-    - Champ `role` (`PUBLIC`, `STRUCTURE_ADMIN`, `SUPER_ADMIN`)
+    - Champ `role` (`PUBLIC`, `ADMIN_STRUCTURE`, `SUPER_ADMIN`)
+      - compatibilité conservée avec l’alias historique `STRUCTURE_ADMIN`
     - Champ `structure` (liaison de l'admin structure à sa structure)
   - API : `backend/users_app/views.py` (`UserViewSet`)
   - Sérialiseur : `backend/users_app/serializers.py`
@@ -45,8 +46,8 @@
   - Sérialiseur : `backend/resources_app/serializers.py`
   - Vue : `backend/resources_app/views.py` (`ResourceViewSet`)
     - Isolation multi-structure:
-      - un `STRUCTURE_ADMIN` ne voit/modifie que les ressources de sa structure
-      - impossible pour un `STRUCTURE_ADMIN` de créer/modifier une ressource d'une autre structure
+      - un `ADMIN_STRUCTURE` ne voit/modifie que les ressources de sa structure
+      - impossible pour un `ADMIN_STRUCTURE` de créer/modifier une ressource d'une autre structure
     - Journalisation d'audit automatique:
       - `RESOURCE_CREATED`, `RESOURCE_UPDATED`, `RESOURCE_DELETED`
 
@@ -55,6 +56,8 @@
     - `user`, `action`, `timestamp`, `structure`, `resource`, `metadata`
   - Sérialiseur : `backend/audit_app/serializers.py`
   - Vue read-only : `backend/audit_app/views.py` (`AuditLogViewSet`)
+    - super-admin : accès global
+    - admin structure : accès restreint aux logs de sa structure
     - Filtres query params : `action`, `user_id`, `structure_id`, `resource_id`
 
 ### 2.2. Configuration & base de données
@@ -88,16 +91,18 @@
   - `GET /api/services/`
   - `GET /api/diseases/`
   - `GET /api/resources/`
-  - `GET /api/audit-logs/` (journal d’audit)
+  - `GET /api/audit-logs/` (journal d’audit, scope selon le rôle)
 
 - **Recherche géographique (crucial)**
   - `GET /api/search/?lat=<latitude>&lng=<longitude>&radius_km=<rayon>&limit=<n>`
+  - Alternative sans GPS : `GET /api/search/?city=<ville>&...`
   - Traitement :
     - création d’un `Point(lng, lat, srid=4326)`
     - filtre spatial par rayon (`distance_lte`) pour éviter les scans complets
     - `annotate(distance=Distance("location", user_location))`
     - tri par distance croissante
     - limitation du nombre de résultats (borné côté serveur)
+    - fallback ville : coordonnées connues + inférence à partir des structures enregistrées
   - Réponse (par structure) :
     - `id`, `name`, `type`, `address`, `contact_phone`, `is_active`
     - `location` (GeoJSON : `type`, `coordinates`)
@@ -142,16 +147,17 @@ curl -X GET "http://localhost:8000/api/search/?lat=3.8667&lng=11.5167" \
 
 - `src/app/app.ts` : composant racine.
 - `src/app/app.routes.ts` : définition des routes principales avec **lazy loading** :
-  - `'' → redirectTo 'public'`
+  - `'' → redirectTo 'public/home'` (avec redirection rôle via guard)
   - `'public' → ./features/public/public.routes`
   - `'admin' → ./features/admin-structure/admin-structure.routes`
+  - `'structure-admin' → ./features/admin-structure/admin-structure.routes`
   - `'super-admin' → ./features/super-admin/super-admin.routes`
 
 - **Core**
   - `src/app/core/services/api.service.ts`
     - Service centralisé des appels HTTP vers le backend.
     - Méthode principale :
-      - `searchStructures(lat: number, lng: number)` → `GET /api/search/`
+      - `searchStructures(params)` → `GET /api/search/` (query/resource/type/blood_group/availability/radius/city/coords)
   - `src/app/core/services/auth.service.ts`
     - Gestion des tokens JWT (`access` / `refresh`) + lecture du rôle dans le token.
   - `src/app/core/interceptors/jwt.interceptor.ts`
@@ -169,15 +175,21 @@ curl -X GET "http://localhost:8000/api/search/?lat=3.8667&lng=11.5167" \
 
 - **Features**
   - `src/app/features/public/`
-    - `public-shell.component.*` : layout public split-screen (liste + carte).
-    - `public.routes.ts` : route racine `/public`.
+    - `home/home.component.*` : page recherche principale.
+    - `results/search-results.component.*` : page résultats + carte.
+    - `structure-details/structure-details.component.*` : fiche structure.
+    - `login/login.component.*` : page connexion administrateur.
+    - `public.routes.ts` : `/public/home`, `/public/results`, `/public/structure/:id`, `/public/login`.
   - `src/app/features/admin-structure/`
     - `auth/admin-login.component.*` : page de connexion admin (`/admin/login`).
     - `layout/admin-layout.component.*` : layout avec sidebar + topbar pour l’admin structure.
     - `resources/admin-resources-page.component.*` : page Ressources/Stocks.
+    - `profile/admin-structure-profile-page.component.*` : édition infos structure.
+    - `services/admin-services-page.component.*` : affectation des services à la structure.
+    - `history/admin-history-page.component.*` : historique d’audit de la structure.
     - `admin-structure.routes.ts` :
       - `/admin/login` → `AdminLoginComponent`
-      - `/admin` → `AdminLayoutComponent` avec enfant `/admin/resources`
+      - `/structure-admin/*` → `AdminLayoutComponent` (dashboard/resources/profile/services/history)
   - `src/app/features/super-admin/`
     - `structures/super-admin-structures-page.component.*` : gestion des structures + audit.
     - `super-admin.routes.ts` : route `/super-admin`.
@@ -185,23 +197,23 @@ curl -X GET "http://localhost:8000/api/search/?lat=3.8667&lng=11.5167" \
 ### 3.3. Chemins d’accès aux pages (URLs)
 
 - **Interface publique**
-  - `/public`
-    - Navbar en haut.
-    - Colonne gauche (`w-1/3`) : liste des structures (`ResultCardComponent`) avec filtres.
-    - Colonne droite (`w-2/3`) : carte Leaflet (`MapComponent`).
+  - `/public/home` : recherche + filtres avancés + boutons d’urgence
+  - `/public/results` : résultats liste + carte
+  - `/public/structure/:id` : fiche détaillée
+  - `/public/login` : connexion administrateur
 
 - **Admin structure**
   - `/admin/login`
     - Page de connexion admin avec formulaire email/mot de passe.
-  - `/admin`
-    - Layout admin (sidebar HC Admin, topbar).
-    - Redirection vers `/admin/resources`.
-  - `/admin/resources`
-    - Page Ressources/Stocks (tuiles Sang/Oxygène/Couveuses/Médicaments, tableau de stocks, formulaire Ajouter/Modifier).
+  - `/structure-admin/dashboard` : vue ressources/stocks
+  - `/structure-admin/resources` : alias ressources/stocks
+  - `/structure-admin/profile` : profil structure
+  - `/structure-admin/services` : services de la structure
+  - `/structure-admin/history` : historique des opérations
 
 - **Super admin**
-  - `/super-admin`
-    - Page de gestion des structures + panneau d’audit récent (journal d’actions).
+  - `/super-admin/dashboard`
+    - Page de gestion des structures/admins + panneau d’audit récent.
 
 ---
 
@@ -286,23 +298,26 @@ Ce fichier résume **ce qui a été implémenté**, **où se trouvent les fichie
 > Toutes les URLs ci‑dessous supposent que le serveur Angular tourne sur `http://localhost:4200`.
 
 - **Interface publique (recherche + carte)**
-  - URL directe : `http://localhost:4200/public`
-  - Le chemin racine `http://localhost:4200/` redirige également vers `/public`.  
-  - Si tu vois une page blanche, saisis manuellement `/public` dans la barre d’adresse.
+  - URL de recherche : `http://localhost:4200/public/home`
+  - URL des résultats : `http://localhost:4200/public/results`
+  - Le chemin racine `http://localhost:4200/` redirige vers `/public/home`.
 
 - **Interface administrateur de structure**
   - Connexion admin : `http://localhost:4200/admin/login`
-  - Layout admin (avec sidebar) : `http://localhost:4200/admin`
-    - Redirige automatiquement vers : `http://localhost:4200/admin/resources`
-  - Page **Ressources/Stocks** : `http://localhost:4200/admin/resources`
+  - Dashboard : `http://localhost:4200/structure-admin/dashboard`
+  - Ressources/Stocks : `http://localhost:4200/structure-admin/resources`
+  - Profil : `http://localhost:4200/structure-admin/profile`
+  - Services : `http://localhost:4200/structure-admin/services`
+  - Historique : `http://localhost:4200/structure-admin/history`
 
 - **Interface super‑admin (gestion des structures + audit)**
-  - URL : `http://localhost:4200/super-admin`
+  - URL : `http://localhost:4200/super-admin/dashboard`
 
 - **Backend Django / API**
   - Racine API : `http://localhost:8000/api/`
   - Exemples :
     - Recherche géographique : `http://localhost:8000/api/search/?lat=3.8667&lng=11.5167`
+    - Recherche par ville : `http://localhost:8000/api/search/?city=Yaounde&resource=blood`
     - Structures : `http://localhost:8000/api/structures/`
     - Ressources : `http://localhost:8000/api/resources/`
     - Audit : `http://localhost:8000/api/audit-logs/`

@@ -7,7 +7,7 @@ export const superAdminRoleGuard: CanActivateFn = () => {
   const router = inject(Router);
 
   if (!auth.isAuthenticated()) {
-    return router.createUrlTree(['/public']);
+    return router.createUrlTree(['/public/login']);
   }
 
   if (auth.hasRole('SUPER_ADMIN')) {
@@ -18,5 +18,5 @@ export const superAdminRoleGuard: CanActivateFn = () => {
     return router.createUrlTree(['/structure-admin/dashboard']);
   }
 
-  return router.createUrlTree(['/public']);
+  return router.createUrlTree(['/public/login']);
 };

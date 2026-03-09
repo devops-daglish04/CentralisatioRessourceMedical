@@ -4,32 +4,55 @@
       <h3>{{ structure.name }}</h3>
       <p>{{ structure.address }}</p>
     </div>
-    <strong>{{ structure.distance | number: '1.1-1' }} km</strong>
+    <div class="distance-info">
+      <strong>{{ structure.distance | number: '1.1-1' }} km</strong>
+      <span class="structure-type">{{ structure.type }}</span>
+    </div>
   </div>
 
   <div class="status-line">
-    <span class="status-pill" [class.status-pill--ok]="structure.availability">
-      {{ structure.availability ? 'Disponible' : 'Rupture' }}
+    <span class="status-pill" 
+          [class.status-pill--available]="hasAvailableResources()"
+          [class.status-pill--critical]="hasCriticalResources()"
+          [class.status-pill--unavailable]="hasUnavailableResources()">
+      {{ getStatusText() }}
     </span>
     <span
       *ngIf="structure.blood_groups.length > 0"
       class="status-pill status-pill--blood"
-      title="Groupes sanguins"
+      title="Groupes sanguins disponibles"
     >
-      {{ structure.blood_groups.join(', ') }}
+      🩸 {{ structure.blood_groups.join(', ') }}
     </span>
   </div>
 
-  <ul class="resources">
-    <li *ngFor="let resource of structure.resources">
-      <span>{{ resource.resource_type }} - {{ resource.name_or_group }}</span>
-      <span>{{ resource.quantity }} {{ resource.unit }}</span>
-    </li>
-  </ul>
+  <div class="resources-preview">
+    <div class="resource-item" 
+         *ngFor="let resource of structure.resources.slice(0, 3); trackBy: trackByResourceId"
+         [class.resource--available]="resource.status === 'Disponible'"
+         [class.resource--critical]="resource.status === 'Critique'"
+         [class.resource--unavailable]="resource.status === 'Rupture'">
+      <span class="resource-icon">{{ getResourceIcon(resource.resource_type) }}</span>
+      <span class="resource-name">{{ resource.name_or_group }}</span>
+      <span class="resource-quantity">{{ resource.quantity }} {{ resource.unit }}</span>
+    </div>
+    <div *ngIf="structure.resources.length > 3" class="more-resources">
+      +{{ structure.resources.length - 3 }} autres ressources
+    </div>
+  </div>
 
   <div class="card-actions">
-    <button type="button" (click)="onViewDetails()">Voir details</button>
-    <button type="button" class="secondary" (click)="onFocusMap()">Voir sur la carte</button>
-    <a [href]="itineraryLink()" target="_blank" rel="noopener">Itineraire</a>
+    <button type="button" class="primary-btn" (click)="onViewDetails()">
+      <span class="btn-icon">📋</span>
+      Voir détails
+    </button>
+    <button type="button" class="secondary-btn" (click)="onFocusMap()">
+      <span class="btn-icon">🗺️</span>
+      Voir sur la carte
+    </button>
+    <a [href]="itineraryLink()" target="_blank" rel="noopener" class="itinerary-btn">
+      <span class="btn-icon">🧭</span>
+      Itinéraire
+    </a>
   </div>
 </article>

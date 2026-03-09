@@ -1,0 +1,39 @@
+<div class="login-page">
+  <header class="topbar">
+    <a class="brand" routerLink="/public/home">MediResources</a>
+  </header>
+
+  <main class="login-main">
+    <section class="card">
+      <h1>Connexion</h1>
+      <p>Accès réservé aux administrateurs</p>
+
+      <form (ngSubmit)="onSubmit()" class="form">
+        <label>
+          Email ou nom d'utilisateur
+          <input
+            type="text"
+            name="email"
+            [(ngModel)]="email"
+            placeholder="email@domaine.com ou username"
+          />
+        </label>
+
+        <label>
+          Mot de passe
+          <input type="password" name="password" [(ngModel)]="password" />
+        </label>
+
+        <button type="submit" [disabled]="isLoading()">
+          {{ isLoading() ? 'Connexion...' : 'Se connecter' }}
+        </button>
+      </form>
+
+      <p *ngIf="errorMessage()" class="error">{{ errorMessage() }}</p>
+
+      <div class="hint">
+        Pour obtenir un compte, contactez l'administrateur de la plateforme.
+      </div>
+    </section>
+  </main>
+</div>

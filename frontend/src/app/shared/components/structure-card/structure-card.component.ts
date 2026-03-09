@@ -27,4 +27,36 @@ export class StructureCardComponent {
     const lng = this.structure.longitude;
     return `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
   }
+
+  trackByResourceId(index: number, resource: any): number {
+    return resource.id || index;
+  }
+
+  hasAvailableResources(): boolean {
+    return this.structure.resources.some(r => r.status === 'Disponible');
+  }
+
+  hasCriticalResources(): boolean {
+    return this.structure.resources.some(r => r.status === 'Critique');
+  }
+
+  hasUnavailableResources(): boolean {
+    return this.structure.resources.some(r => r.status === 'Rupture');
+  }
+
+  getStatusText(): string {
+    if (this.hasAvailableResources()) return 'Disponible';
+    if (this.hasCriticalResources()) return 'Critique';
+    return 'Rupture';
+  }
+
+  getResourceIcon(resourceType: string): string {
+    const icons: { [key: string]: string } = {
+      'Sang': '🩸',
+      'Medicament': '💊',
+      'Oxygene': '🫁',
+      'Couveuse': '👶'
+    };
+    return icons[resourceType] || '📦';
+  }
 }

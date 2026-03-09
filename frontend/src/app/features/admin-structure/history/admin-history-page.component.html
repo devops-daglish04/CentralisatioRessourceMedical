@@ -1,0 +1,41 @@
+<section class="card">
+  <h2>Historique des modifications</h2>
+
+  <div class="toolbar">
+    <input
+      type="text"
+      [(ngModel)]="actionFilter"
+      placeholder="Filtrer par action (ex: RESOURCE_UPDATED)"
+    />
+    <button type="button" (click)="onApplyFilter()">Appliquer</button>
+  </div>
+
+  <div *ngIf="isLoading()" class="state">Chargement...</div>
+  <p *ngIf="message()" class="state error">{{ message() }}</p>
+
+  <div *ngIf="!isLoading()" class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Action</th>
+          <th>Utilisateur</th>
+          <th>Ressource</th>
+          <th>Détails</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let log of logs(); trackBy: trackByLogId">
+          <td>{{ log.timestamp | date: 'short' }}</td>
+          <td>{{ log.action }}</td>
+          <td>{{ log.user_email || '-' }}</td>
+          <td>{{ log.resource_display || '-' }}</td>
+          <td>{{ metadataPreview(log.metadata) }}</td>
+        </tr>
+        <tr *ngIf="logs().length === 0">
+          <td colspan="5" class="empty">Aucune entrée d'historique.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
